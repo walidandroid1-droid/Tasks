@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Distance Measurement Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .measurement-point {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: move;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 10;
+            transition: transform 0.1s;
+        }
+
+        .measurement-point:hover {
+            transform: scale(1.2);
+        }
+
+        .measurement-point::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .measurement-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+            transform-origin: left center;
+            z-index: 5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .measurement-label {
+            position: absolute;
+            background: #1f2937;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 15;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .reference-object {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reference-object:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .reference-object.selected {
+            ring: 4px solid #667eea;
+            border-color: #667eea;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #ef4444;
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        .suggestion-card {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8 text-white">
+            <h1 class="text-4xl md:text-5xl font-bold mb-3 tracking-tight">
+                <i class="fas fa-ruler-combined mr-3"></i>Smart Measure
+            </h1>
+            <p class="text-lg opacity-90">Upload a photo, set a reference, measure anything</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel: Controls -->
+            <div class="glass-panel rounded-2xl p-6 space-y-6 h-fit">
+                <!-- Upload Section -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-camera mr-2 text-indigo-600"></i>1. Add Photo
+                    </h2>
+                    
+                    <div class="upload-zone rounded-xl p-6 text-center cursor-pointer" id="uploadZone">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-600 font-medium">Drop image or click to upload</p>
+                        <p class="text-sm text-gray-400 mt-1">or take a photo</p>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden-input" capture="environment">
+                    </div>
+                    
+                    <button onclick="document.getElementById('cameraInput').click()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fas fa-camera"></i> Take Photo
+                    </button>
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden-input">
+                </div>
+
+                <!-- Reference Section -->
+                <div id="referenceSection" class="space-y-4 opacity-50 pointer-events-none transition-opacity">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-ruler mr-2 text-indigo-600"></i>2. Set Reference
+                    </h2>
+                    <p class="text-sm text-gray-600">Select a known object in the image to calibrate measurements:</p>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="reference-object bg-white border-2 border-gray-200 rounded-lg p-3 text-center" data-width="8.5" data-name="Credit Card" onclick="selectReference(this)">
+                            <i class="fas fa-credit-card text-2xl text-gray-600 mb-1"></i>
+                            <div class="text-xs font-semibold">Credit Card</div>
+                            <div class="text-xs text-gray-500">8.5 cm</div>
+                        </div>
+                        <div class="reference-object bg-white border-2 border-gray-200 rounded-lg p-3 text-center" data-width="21.0" data-name="A4 Paper" onclick="selectReference(this)">
+                            <i class="fas fa-file-alt text-2xl text-gray-600 mb-1"></i>
+                            <div class="text-xs font-semibold">A4 Paper</div>
+                            <div class="text-xs text-gray-500">21 cm</div>
+                        </div>
+                        <div class="reference-object bg-white border-2 border-gray-200 rounded-lg p-3 text-center" data-width="7.0" data-name="Smartphone" onclick="selectReference(this)">
+                            <i class="fas fa-mobile-alt text-2xl text-gray-600 mb-1"></i>
+                            <div class="text-xs font-semibold">Phone</div>
+                            <div class="text-xs text-gray-500">7 cm</div>
+                        </div>
+                        <div class="reference-object bg-white border-2 border-gray-200 rounded-lg p-3 text-center" data-width="5.0" data-name="Custom" onclick="selectReference(this)">
+                            <i class="fas fa-pen-ruler text-2xl text-gray-600 mb-1"></i>
+                            <div class="text-xs font-semibold">Custom</div>
+                            <div class="text-xs text-gray-500">Enter size</div>
+                        </div>
+                    </div>
+
+                    <div id="customSizeInput" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Reference length (cm)</label>
+                        <input type="number" id="customSize" class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:border-indigo-500 focus:outline-none" placeholder="e.g., 15" step="0.1">
+                    </div>
+
+                    <button id="setRefBtn" class="w-full bg-gray-600 text-white py-2 rounded-lg font-medium opacity-50 cursor-not-allowed" disabled>
+                        Click two points on image to set reference
+                    </button>
+                </div>
+
+                <!-- Measurement Section -->
+                <div id="measureSection" class="space-y-4 opacity-50 pointer-events-none transition-opacity">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-arrows-alt-h mr-2 text-indigo-600"></i>3. Measure
+                    </h2>
+                    <button id="measureBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition">
+                        <i class="fas fa-play mr-2"></i>Start Measuring
+                    </button>
+                    <button id="clearBtn" class="w-full bg-red-100 hover:bg-red-200 text-red-600 py-2 rounded-lg font-medium transition">
+                        <i class="fas fa-trash mr-2"></i>Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Center: Canvas -->
+            <div class="lg:col-span-2">
+                <div class="glass-panel rounded-2xl p-4 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-800">Image Canvas</h3>
+                        <div id="scaleIndicator" class="hidden bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            Scale: <span id="scaleValue">--</span> cm/px
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 flex items-center justify-center bg-gray-100 rounded-xl overflow-hidden relative min-h-[400px]" id="canvasWrapper">
+                        <div id="placeholder" class="text-center text-gray-400">
+                            <i class="fas fa-image text-6xl mb-4"></i>
+                            <p>Upload an image to begin</p>
+                        </div>
+                        <div id="imageContainer" class="canvas-container hidden">
+                            <img id="mainImage" class="max-w-full max-h-[600px] object-contain" draggable="false">
+                            <div id="overlay" class="absolute inset-0 cursor-crosshair"></div>
+                        </div>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div id="resultsPanel" class="mt-4 hidden">
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                            <h4 class="font-bold text-indigo-900 mb-3 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i>Measurement Results
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white rounded-lg p-3 shadow-sm">
+                                    <div class="text-sm text-gray-600">Distance</div>
+                                    <div class="text-2xl font-bold text-indigo-600" id="distanceValue">--</div>
+                                </div>
+                                <div class="bg-white rounded-lg p-3 shadow-sm">
+                                    <div class="text-sm text-gray-600">Pixel Length</div>
+                                    <div class="text-2xl font-bold text-gray-800" id="pixelValue">--</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Smart Suggestions -->
+                            <div id="suggestions" class="mt-4 hidden">
+                                <div class="text-sm font-semibold text-gray-700 mb-2">Detected Object Suggestions:</div>
+                                <div id="suggestionList" class="space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+        let scale = null; // cm per pixel
+        let points = [];
+        let isSettingReference = false;
+        let isMeasuring = false;
+        let referencePoints = [];
+        let measurementPoints = [];
+        let selectedRefObject = null;
+
+        // DOM Elements
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const cameraInput = document.getElementById('cameraInput');
+        const imageContainer = document.getElementById('imageContainer');
+        const mainImage = document.getElementById('mainImage');
+        const overlay = document.getElementById('overlay');
+        const placeholder = document.getElementById('placeholder');
+        const referenceSection = document.getElementById('referenceSection');
+        const measureSection = document.getElementById('measureSection');
+        const setRefBtn = document.getElementById('setRefBtn');
+        const measureBtn = document.getElementById('measureBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const customSizeInput = document.getElementById('customSizeInput');
+        const scaleIndicator = document.getElementById('scaleIndicator');
+        const scaleValue = document.getElementById('scaleValue');
+        const resultsPanel = document.getElementById('resultsPanel');
+
+        // Event Listeners
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) handleImage(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleImage(e.target.files[0]);
+        });
+
+        cameraInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleImage(e.target.files[0]);
+        });
+
+        setRefBtn.addEventListener('click', () => {
+            isSettingReference = true;
+            isMeasuring = false;
+            referencePoints = [];
+            clearOverlay();
+            setRefBtn.textContent = 'Click first point of reference object';
+            setRefBtn.classList.remove('bg-gray-600', 'opacity-50', 'cursor-not-allowed');
+            setRefBtn.classList.add('bg-indigo-600');
+        });
+
+        measureBtn.addEventListener('click', () => {
+            if (!scale) {
+                alert('Please set a reference scale first!');
+                return;
+            }
+            isMeasuring = true;
+            isSettingReference = false;
+            measurementPoints = [];
+            clearMeasurements();
+            measureBtn.textContent = 'Click two points to measure';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        overlay.addEventListener('click', handleCanvasClick);
+
+        function handleImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                mainImage.src = e.target.result;
+                mainImage.onload = () => {
+                    placeholder.classList.add('hidden');
+                    imageContainer.classList.remove('hidden');
+                    referenceSection.classList.remove('opacity-50', 'pointer-events-none');
+                    currentImage = mainImage;
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectReference(element) {
+            document.querySelectorAll('.reference-object').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedRefObject = element;
+            
+            if (element.dataset.name === 'Custom') {
+                customSizeInput.classList.remove('hidden');
+            } else {
+                customSizeInput.classList.add('hidden');
+            }
+            
+            setRefBtn.disabled = false;
+            setRefBtn.textContent = 'Click to set reference points';
+            setRefBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function handleCanvasClick(e) {
+            const rect = overlay.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (isSettingReference) {
+                handleReferenceClick(x, y);
+            } else if (isMeasuring) {
+                handleMeasurementClick(x, y);
+            }
+        }
+
+        function handleReferenceClick(x, y) {
+            const point = createPoint(x, y, referencePoints.length + 1);
+            overlay.appendChild(point);
+            referencePoints.push({x, y, element: point});
+
+            if (referencePoints.length === 1) {
+                setRefBtn.textContent = 'Click second point of reference';
+            } else if (referencePoints.length === 2) {
+                const distance = Math.sqrt(
+                    Math.pow(referencePoints[1].x - referencePoints[0].x, 2) + 
+                    Math.pow(referencePoints[1].y - referencePoints[0].y, 2)
+                );
+                
+                let realDistance;
+                if (selectedRefObject.dataset.name === 'Custom') {
+                    realDistance = parseFloat(document.getElementById('customSize').value);
+                    if (!realDistance) {
+                        alert('Please enter a custom size!');
+                        referencePoints = [];
+                        clearOverlay();
+                        return;
+                    }
+                } else {
+                    realDistance = parseFloat(selectedRefObject.dataset.width);
+                }
+
+                scale = realDistance / distance;
+                scaleIndicator.classList.remove('hidden');
+                scaleValue.textContent = scale.toFixed(4);
+                
+                drawLine(referencePoints[0], referencePoints[1], 'reference');
+                
+                isSettingReference = false;
+                setRefBtn.textContent = 'Reference Set! (' + realDistance + ' cm)';
+                setRefBtn.classList.remove('bg-indigo-600');
+                setRefBtn.classList.add('bg-green-600');
+                
+                measureSection.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        function handleMeasurementClick(x, y) {
+            if (measurementPoints.length >= 2) {
+                clearMeasurements();
+                measurementPoints = [];
+            }
+
+            const label = measurementPoints.length === 0 ? 'A' : 'B';
+            const point = createPoint(x, y, label);
+            overlay.appendChild(point);
+            measurementPoints.push({x, y, element: point, label});
+
+            if (measurementPoints.length === 2) {
+                const pixelDist = Math.sqrt(
+                    Math.pow(measurementPoints[1].x - measurementPoints[0].x, 2) + 
+                    Math.pow(measurementPoints[1].y - measurementPoints[0].y, 2)
+                );
+                const realDist = pixelDist * scale;
+                
+                drawLine(measurementPoints[0], measurementPoints[1], 'measurement', realDist);
+                showResults(realDist, pixelDist);
+                
+                measureBtn.textContent = 'Measure Again';
+                isMeasuring = false;
+            }
+        }
+
+        function createPoint(x, y, label) {
+            const point = document.createElement('div');
+            point.className = 'measurement-point';
+            point.style.left = (x - 10) + 'px';
+            point.style.top = (y - 10) + 'px';
+            point.dataset.label = label;
+            
+            const ring = document.createElement('div');
+            ring.className = 'pulse-ring';
+            point.appendChild(ring);
+            
+            return point;
+        }
+
+        function drawLine(p1, p2, type, distance) {
+            const length = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+            
+            const line = document.createElement('div');
+            line.className = 'measurement-line';
+            line.style.width = length + 'px';
+            line.style.left = p1.x + 'px';
+            line.style.top = p1.y + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            if (type === 'measurement') {
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+                
+                const label = document.createElement('div');
+                label.className = 'measurement-label';
+                label.style.left = midX + 'px';
+                label.style.top = midY + 'px';
+                label.textContent = distance.toFixed(2) + ' cm';
+                overlay.appendChild(label);
+            }
+            
+            overlay.appendChild(line);
+        }
+
+        function showResults(distance, pixels) {
+            resultsPanel.classList.remove('hidden');
+            document.getElementById('distanceValue').textContent = distance.toFixed(2) + ' cm';
+            document.getElementById('pixelValue').textContent = Math.round(pixels) + ' px';
+            
+            generateSuggestions(distance);
+        }
+
+        function generateSuggestions(distance) {
+            const suggestions = [];
+            
+            // Common object size database
+            const objects = [
+                { name: 'Credit Card', width: 8.5, height: 5.4 },
+                { name: 'Smartphone (iPhone)', width: 7.1, height: 14.7 },
+                { name: 'A4 Paper', width: 21.0, height: 29.7 },
+                { name: 'US Letter', width: 21.6, height: 27.9 },
+                { name: 'CD/DVD', diameter: 12.0 },
+                { name: 'Coffee Cup (diameter)', diameter: 8.0 },
+                { name: 'Standard Door (width)', width: 81.0 },
+                { name: 'Brick', width: 19.0, height: 9.0 },
+                { name: 'Mouse (computer)', width: 6.5, height: 11.0 },
+                { name: 'Keyboard (compact)', width: 30.0, height: 12.0 },
+                { name: 'Pen/Pencil (length)', length: 14.0 },
+                { name: 'Soda Can (height)', height: 12.2, diameter: 6.6 },
+                { name: 'Bottle (wine, height)', height: 30.0 },
+                { name: 'Tablet (iPad)', width: 17.8, height: 25.0 },
+                { name: 'Post-it Note', width: 7.6, height: 7.6 }
+            ];
+            
+            objects.forEach(obj => {
+                let dims = [];
+                if (obj.width) dims.push(obj.width);
+                if (obj.height) dims.push(obj.height);
+                if (obj.length) dims.push(obj.length);
+                if (obj.diameter) dims.push(obj.diameter);
+                
+                dims.forEach(dim => {
+                    const diff = Math.abs(distance - dim);
+                    const percentDiff = (diff / dim) * 100;
+                    
+                    if (percentDiff < 20) {
+                        suggestions.push({
+                            name: obj.name,
+                            match: dim,
+                            confidence: Math.round(100 - percentDiff),
+                            actual: distance
+                        });
+                    }
+                });
+            });
+            
+            suggestions.sort((a, b) => b.confidence - a.confidence);
+            
+            const suggestionList = document.getElementById('suggestionList');
+            const suggestionsDiv = document.getElementById('suggestions');
+            
+            if (suggestions.length > 0) {
+                suggestionsDiv.classList.remove('hidden');
+                suggestionList.innerHTML = suggestions.slice(0, 3).map(s => `
+                    <div class="suggestion-card bg-white rounded-lg p-3 border-l-4 border-indigo-500 shadow-sm flex justify-between items-center">
+                        <div>
+                            <div class="font-semibold text-gray-800">${s.name}</div>
+                            <div class="text-sm text-gray-600">Expected: ${s.match} cm</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-indigo-600">${s.confidence}%</div>
+                            <div class="text-xs text-gray-500">match</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                suggestionsDiv.classList.add('hidden');
+            }
+        }
+
+        function clearOverlay() {
+            const points = overlay.querySelectorAll('.measurement-point');
+            const lines = overlay.querySelectorAll('.measurement-line');
+            const labels = overlay.querySelectorAll('.measurement-label');
+            points.forEach(p => p.remove());
+            lines.forEach(l => l.remove());
+            labels.forEach(l => l.remove());
+        }
+
+        function clearMeasurements() {
+            const points = overlay.querySelectorAll('.measurement-point');
+            const lines = overlay.querySelectorAll('.measurement-line');
+            const labels = overlay.querySelectorAll('.measurement-label');
+            
+            // Keep reference points (first 2)
+            points.forEach((p, i) => { if (i >= 2) p.remove(); });
+            lines.forEach((l, i) => { if (i >= 1) l.remove(); });
+            labels.forEach(l => l.remove());
+        }
+    </script>
+</body>
+</html>

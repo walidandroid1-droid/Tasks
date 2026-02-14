@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Budget Ultra</title>
+<style>
+:root {
+  --safe-top: env(safe-area-inset-top, 47px);
+  --safe-bottom: env(safe-area-inset-bottom, 34px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  
+  --ios-bg: #000000;
+  --ios-card: #1c1c1e;
+  --ios-card-elevated: #2c2c2e;
+  --ios-blue: #0a84ff;
+  --ios-green: #30d158;
+  --ios-orange: #ff9f0a;
+  --ios-red: #ff453a;
+  --ios-purple: #bf5af2;
+  --ios-teal: #64d2ff;
+  --ios-yellow: #ffd60a;
+  --ios-pink: #ff375f;
+  --ios-indigo: #5e5ce6;
+  --ios-gray: #8e8e93;
+  --ios-gray2: #636366;
+  --ios-gray3: #48484a;
+  --ios-gray4: #3a3a3c;
+  --ios-gray5: #2c2c2e;
+  --ios-gray6: #1c1c1e;
+  
+  --dynamic-island-height: 37px;
+  --tab-bar-height: 83px;
+  --header-height: 96px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  background: var(--ios-bg);
+  color: white;
+}
+
+/* Dynamic Island spacing */
+.app-container {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* Header iOS style */
+.ios-header {
+  padding: 12px 20px 16px;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ios-header-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(180deg, #ffffff 0%, #8e8e93 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ios-header-subtitle {
+  font-size: 15px;
+  color: var(--ios-gray);
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* Main content scrollable */
+.main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px;
+  padding-bottom: calc(var(--tab-bar-height) + 20px);
+}
+
+.main-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS Cards */
+.ios-card {
+  background: var(--ios-card);
+  border-radius: 20px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.ios-card-header {
+  padding: 16px 20px 12px;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ios-card-body {
+  padding: 0 20px 20px;
+}
+
+/* Quick Input - iOS Style */
+.quick-input-section {
+  background: linear-gradient(180deg, var(--ios-card) 0%, var(--ios-gray6) 100%);
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.input-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.input-group {
+  flex: 1;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: var(--ios-gray);
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ios-input {
+  width: 100%;
+  height: 56px;
+  background: var(--ios-gray6);
+  border: 1px solid var(--ios-gray4);
+  border-radius: 14px;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 0 16px;
+  text-align: center;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.ios-input:focus {
+  outline: none;
+  border-color: var(--ios-blue);
+  background: var(--ios-gray5);
+}
+
+.ios-input::placeholder {
+  color: var(--ios-gray2);
+}
+
+/* Number pad optimized for thumb */
+.number-display {
+  background: var(--ios-gray6);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: right;
+  margin-bottom: 16px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.number-display-value {
+  font-size: 42px;
+  font-weight: 300;
+  color: white;
+  letter-spacing: -1px;
+}
+
+.number-display-currency {
+  font-size: 24px;
+  color: var(--ios-gray);
+  margin-left: 8px;
+}
+
+/* iOS Number Pad */
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.num-key {
+  aspect-ratio: 1;
+  background: var(--ios-gray5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 400;
+  color: white;
+  cursor: pointer;
+  transition: all 0.1s;
+  user-select: none;
+  border: none;
+  -webkit-appearance: none;
+}
+
+.num-key:active {
+  background: var(--ios-gray4);
+  transform: scale(0.95);
+}
+
+.num-key.wide {
+  grid-column: span 2;
+  aspect-ratio: 2;
+  border-radius: 40px;
+}
+
+.num-key.action {
+  background: var(--ios-blue);
+  color: white;
+  font-size: 24px;
+}
+
+.num-key.action:active {
+  background: #0051d5;
+}
+
+.num-key.delete {
+  background: var(--ios-gray4);
+  font-size: 20px;
+}
+
+/* Category Selector - iOS Segmented */
+.category-section {
+  margin-bottom: 16px;
+}
+
+.category-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: var(--ios-gray5);
+  border-radius: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.category-chip:active {
+  transform: scale(0.95);
+}
+
+.category-chip.selected {
+  background: var(--ios-blue);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* iOS Button */
+.ios-button {
+  width: 100%;
+  height: 56px;
+  background: var(--ios-blue);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  -webkit-appearance: none;
+}
+
+.ios-button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.ios-button.secondary {
+  background: var(--ios-gray5);
+  color: white;
+}
+
+.ios-button.success {
+  background: var(--ios-green);
+}
+
+/* Stats Grid - iOS Style */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--ios-card);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: left;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--ios-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.stat-value.positive { color: var(--ios-green); }
+.stat-value.negative { color: var(--ios-red); }
+.stat-value.warning { color: var(--ios-orange); }
+
+/* Progress Ring */
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: var(--ios-card);
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.progress-ring-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.progress-ring-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.progress-ring-bg {
+  fill: none;
+  stroke: var(--ios-gray5);
+  stroke-width: 8;
+}
+
+.progress-ring-fill {
+  fill: none;
+  stroke: var(--ios-blue);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+  filter: drop-shadow(0 0 6px var(--ios-blue));
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.progress-info {
+  flex: 1;
+}
+
+.progress-info-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.progress-info-subtitle {
+  font-size: 15px;
+  color: var(--ios-gray);
+}
+
+/* Calendar - iOS Style */
+.calendar-section {
+  margin-bottom: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--ios-gray4);
+}
+
+.calendar-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.calendar-nav-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--ios-gray5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  color: white;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 12px;
+  gap: 4px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ios-gray);
+  font-weight: 600;
+  padding: 8px 0;
+  text-transform: uppercase;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  margin: 2px;
+}
+
+.calendar-day:active {
+  background: var(--ios-gray5);
+  transform: scale(0.9);
+}
+
+.calendar-day.today {
+  background: var(--ios-blue);
+  box-shadow: 0 0 0 2px var(--ios-blue);
+}
+
+.calendar-day.selected {
+  background: var(--ios-gray4);
+  box-shadow: 0 0 0 2px var(--ios-blue);
+}
+
+.calendar-day-number {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.calendar-day-amount {
+  font-size: 10px;
+  color: var(--ios-gray);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.calendar-day-dot {
+  position: absolute;
+  bottom: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.dot-good { background: var(--ios-green); }
+.dot-warning { background: var(--ios-orange); }
+.dot-danger { background: var(--ios-red); }
+
+/* Transaction List */
+.transactions-list {
+  background: var(--ios-card);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid var(--ios-gray4);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.transaction-item:active {
+  background: var(--ios-gray5);
+}
+
+.transaction-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.transaction-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transaction-subtitle {
+  font-size: 15px;
+  color: var(--ios-gray);
+}
+
+.transaction-amount {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-red);
+  text-align: right;
+}
+
+/* Tab Bar - iOS Style */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--tab-bar-height);
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(255,255,255,0.2);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: var(--safe-bottom);
+  z-index: 1000;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 20px;
+  color: var(--ios-gray);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.tab-item.active {
+  color: var(--ios-blue);
+}
+
+.tab-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.tab-label {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Modal - iOS Sheet */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--ios-card);
+  border-radius: 24px 24px 0 0;
+  padding: 20px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.active .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-handle {
+  width: 36px;
+  height: 5px;
+  background: var(--ios-gray3);
+  border-radius: 3px;
+  margin: 0 auto 20px;
+}
+
+/* Haptic feedback simulation */
+@media (hover: none) {
+  .num-key:active,
+  .category-chip:active,
+  .calendar-day:active,
+  .transaction-item:active,
+  .ios-button:active {
+    opacity: 0.7;
+  }
+}
+
+/* Hide on scroll for immersive experience */
+.hide-on-scroll {
+  transition: transform 0.3s;
+}
+
+.scrolled .hide-on-scroll {
+  transform: translateY(-100%);
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- Header -->
+  <header class="ios-header">
+    <h1 class="ios-header-title">Budget Ultra</h1>
+    <p class="ios-header-subtitle" id="current-date">Aujourd'hui</p>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-scroll" id="main-scroll">
+    
+    <!-- Quick Add Card -->
+    <div class="quick-input-section">
+      <div class="number-display">
+        <span class="number-display-value" id="display-amount">0</span>
+        <span class="number-display-currency">DT</span>
+      </div>
+      
+      <!-- iOS Number Pad -->
+      <div class="number-pad">
+        <button class="num-key" onclick="appendNumber('1')">1</button>
+        <button class="num-key" onclick="appendNumber('2')">2</button>
+        <button class="num-key" onclick="appendNumber('3')">3</button>
+        <button class="num-key" onclick="appendNumber('4')">4</button>
+        <button class="num-key" onclick="appendNumber('5')">5</button>
+        <button class="num-key" onclick="appendNumber('6')">6</button>
+        <button class="num-key" onclick="appendNumber('7')">7</button>
+        <button class="num-key" onclick="appendNumber('8')">8</button>
+        <button class="num-key" onclick="appendNumber('9')">9</button>
+        <button class="num-key wide" onclick="appendNumber('0')">0</button>
+        <button class="num-key delete" onclick="deleteNumber()">⌫</button>
+      </div>
+
+      <!-- Category Selector -->
+      <div class="category-section">
+        <div class="category-scroll" id="category-list">
+          <div class="category-chip" onclick="selectCategory(this, '🍽️ Alimentation', '#ff453a')">
+            <span>🍽️</span> <span>Alim</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '🚗 Transport', '#0a84ff')">
+            <span>🚗</span> <span>Trans</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '🏠 Logement', '#bf5af2')">
+            <span>🏠</span> <span>Logt</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '⚕️ Santé', '#30d158')">
+            <span>⚕️</span> <span>Santé</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '🎮 Loisirs', '#ff9f0a')">
+            <span>🎮</span> <span>Lois</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '🛍️ Shop', '#ff375f')">
+            <span>🛍️</span> <span>Shop</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '👶 Enfants', '#64d2ff')">
+            <span>👶</span> <span>Enf</span>
+          </div>
+          <div class="category-chip" onclick="selectCategory(this, '📦 Autre', '#8e8e93')">
+            <span>📦</span> <span>Autre</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="ios-button" onclick="addExpense()">
+        <span>+</span> Ajouter la dépense
+      </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">Budget/jour</div>
+        <div class="stat-value" id="stat-budget">0 DT</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Dépensé</div>
+        <div class="stat-value negative" id="stat-spent">0 DT</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Restant</div>
+        <div class="stat-value positive" id="stat-remaining">0 DT</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Jours rest</div>
+        <div class="stat-value" id="stat-days">0</div>
+      </div>
+    </div>
+
+    <!-- Progress Ring -->
+    <div class="progress-section">
+      <div class="progress-ring-container">
+        <svg class="progress-ring-svg" viewBox="0 0 100 100">
+          <circle class="progress-ring-bg" cx="50" cy="50" r="42"/>
+          <circle class="progress-ring-fill" id="progress-ring" cx="50" cy="50" r="42" 
+                  stroke-dasharray="264" stroke-dashoffset="264"/>
+        </svg>
+        <div class="progress-text" id="progress-percent">0%</div>
+      </div>
+      <div class="progress-info">
+        <div class="progress-info-title">Budget mensuel</div>
+        <div class="progress-info-subtitle" id="progress-detail">Configurez votre revenu</div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="ios-card">
+      <div class="calendar-header">
+        <div class="calendar-title" id="calendar-month">Octobre 2024</div>
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" onclick="changeMonth(-1)">‹</button>
+          <button class="calendar-nav-btn" onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="ios-card">
+      <div class="ios-card-header">
+        <span>Transactions récentes</span>
+        <span style="color: var(--ios-blue); font-size: 17px;" onclick="showAllTransactions()">Voir tout</span>
+      </div>
+      <div class="transactions-list" id="recent-transactions">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Accueil</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('stats')">
+      <span class="tab-icon">📊</span>
+      <span class="tab-label">Stats</span>
+    </div>
+    <div class="tab-item" onclick="switchTab('settings')">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">Réglages</span>
+    </div>
+  </nav>
+
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal" onclick="closeSettings(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h2 style="font-size: 22px; margin-bottom: 20px; text-align: center;">Configuration</h2>
+    
+    <div class="input-group" style="margin-bottom: 16px;">
+      <label>Revenu mensuel (DT)</label>
+      <input type="number" class="ios-input" id="setting-income" placeholder="2500">
+    </div>
+    
+    <div class="input-group" style="margin-bottom: 20px;">
+      <label>Objectif d'épargne (DT)</label>
+      <input type="number" class="ios-input" id="setting-savings" placeholder="500">
+    </div>
+    
+    <button class="ios-button" onclick="saveSettings()">Sauvegarder</button>
+    <button class="ios-button secondary" onclick="closeSettings()" style="margin-top: 12px;">Annuler</button>
+  </div>
+</div>
+
+<script>
+// Budget App Logic
+class BudgetApp {
+  constructor() {
+    this.currentAmount = '0';
+    this.selectedCategory = null;
+    this.selectedCategoryEl = null;
+    this.selectedDay = new Date().getDate();
+    this.currentMonth = new Date().getMonth();
+    this.currentYear = new Date().getFullYear();
+    
+    this.data = this.loadData();
+    this.init();
+  }
+
+  loadData() {
+    const saved = localStorage.getItem('budget_ios_16');
+    return saved ? JSON.parse(saved) : {
+      income: 0,
+      savings: 0,
+      expenses: {}, // { '2024-10': { 15: [{amount, category, color, timestamp}] } }
+      categories: {
+        '🍽️ Alimentation': { color: '#ff453a', icon: '🍽️' },
+        '🚗 Transport': { color: '#0a84ff', icon: '🚗' },
+        '🏠 Logement': { color: '#bf5af2', icon: '🏠' },
+        '⚕️ Santé': { color: '#30d158', icon: '⚕️' },
+        '🎮 Loisirs': { color: '#ff9f0a', icon: '🎮' },
+        '🛍️ Shop': { color: '#ff375f', icon: '🛍️' },
+        '👶 Enfants': { color: '#64d2ff', icon: '👶' },
+        '📦 Autre': { color: '#8e8e93', icon: '📦' }
+      }
+    };
+  }
+
+  save() {
+    localStorage.setItem('budget_ios_16', JSON.stringify(this.data));
+  }
+
+  init() {
+    this.updateDate();
+    this.renderCalendar();
+    this.updateUI();
+    
+    // Check for settings
+    if (this.data.income === 0) {
+      setTimeout(() => this.openSettings(), 500);
+    }
+  }
+
+  updateDate() {
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('current-date').textContent = 
+      new Date().toLocaleDateString('fr-FR', options);
+  }
+
+  getMonthKey() {
+    return `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}`;
+  }
+
+  getDailyBudget() {
+    const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+    return ((this.data.income - this.data.savings) / daysInMonth) || 0;
+  }
+
+  getMonthExpenses() {
+    const monthData = this.data.expenses[this.getMonthKey()] || {};
+    return Object.values(monthData).flat().reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  getDayExpenses(day) {
+    const monthData = this.data.expenses[this.getMonthKey()] || {};
+    return monthData[day] || [];
+  }
+
+  appendNumber(num) {
+    if (this.currentAmount === '0') {
+      this.currentAmount = num;
+    } else {
+      this.currentAmount += num;
+    }
+    this.updateDisplay();
+  }
+
+  deleteNumber() {
+    if (this.currentAmount.length > 1) {
+      this.currentAmount = this.currentAmount.slice(0, -1);
+    } else {
+      this.currentAmount = '0';
+    }
+    this.updateDisplay();
+  }
+
+  updateDisplay() {
+    document.getElementById('display-amount').textContent = 
+      parseInt(this.currentAmount).toLocaleString('fr-FR');
+  }
+
+  selectCategory(element, category, color) {
+    if (this.selectedCategoryEl) {
+      this.selectedCategoryEl.classList.remove('selected');
+    }
+    element.classList.add('selected');
+    this.selectedCategoryEl = element;
+    this.selectedCategory = category;
+    this.selectedColor = color;
+  }
+
+  addExpense() {
+    const amount = parseInt(this.currentAmount);
+    if (amount === 0) {
+      this.haptic('error');
+      return;
+    }
+    if (!this.selectedCategory) {
+      alert('Sélectionnez une catégorie');
+      return;
+    }
+
+    const monthKey = this.getMonthKey();
+    if (!this.data.expenses[monthKey]) {
+      this.data.expenses[monthKey] = {};
+    }
+    if (!this.data.expenses[monthKey][this.selectedDay]) {
+      this.data.expenses[monthKey][this.selectedDay] = [];
+    }
+
+    this.data.expenses[monthKey][this.selectedDay].push({
+      amount: amount,
+      category: this.selectedCategory,
+      color: this.selectedColor,
+      timestamp: new Date().toISOString()
+    });
+
+    this.save();
+    this.haptic('success');
+    
+    // Reset
+    this.currentAmount = '0';
+    this.updateDisplay();
+    
+    // Feedback
+    this.showNotification(`-${amount} DT ${this.selectedCategory}`);
+    this.updateUI();
+    this.renderCalendar();
+  }
+
+  deleteExpense(day, index) {
+    const monthKey = this.getMonthKey();
+    if (this.data.expenses[monthKey] && this.data.expenses[monthKey][day]) {
+      this.data.expenses[monthKey][day].splice(index, 1);
+      if (this.data.expenses[monthKey][day].length === 0) {
+        delete this.data.expenses[monthKey][day];
+      }
+      this.save();
+      this.updateUI();
+      this.renderCalendar();
+      this.haptic('light');
+    }
+  }
+
+  selectDay(day) {
+    this.selectedDay = day;
+    this.renderCalendar();
+    // Scroll to show this day's expenses
+    this.renderRecentTransactions();
+  }
+
+  changeMonth(delta) {
+    this.currentMonth += delta;
+    if (this.currentMonth > 11) {
+      this.currentMonth = 0;
+      this.currentYear++;
+    } else if (this.currentMonth < 0) {
+      this.currentMonth = 11;
+      this.currentYear--;
+    }
+    this.renderCalendar();
+    this.updateUI();
+  }
+
+  renderCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    
+    document.getElementById('calendar-month').textContent = 
+      `${monthNames[this.currentMonth]} ${this.currentYear}`;
+    
+    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+    
+    const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
+    const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+    
+    for (let i = 0; i < firstDay; i++) {
+      html += '<div></div>';
+    }
+    
+    const today = new Date();
+    const isCurrentMonth = today.getMonth() === this.currentMonth && today.getFullYear() === this.currentYear;
+    const todayNum = today.getDate();
+    
+    const dailyBudget = this.getDailyBudget();
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dayExpenses = this.getDayExpenses(i);
+      const total = dayExpenses.reduce((s, e) => s + e.amount, 0);
+      const isToday = isCurrentMonth && i === todayNum;
+      const isSelected = i === this.selectedDay;
+      
+      let dotClass = '';
+      if (total > 0) {
+        if (total <= dailyBudget) dotClass = 'dot-good';
+        else if (total <= dailyBudget * 1.3) dotClass = 'dot-warning';
+        else dotClass = 'dot-danger';
+      }
+      
+      html += `
+        <div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" 
+             onclick="app.selectDay(${i})">
+          <div class="calendar-day-number">${i}</div>
+          ${total > 0 ? `<div class="calendar-day-amount">${total}</div>` : ''}
+          ${dotClass ? `<div class="calendar-day-dot ${dotClass}"></div>` : ''}
+        </div>
+      `;
+    }
+    
+    grid.innerHTML = html;
+  }
+
+  updateUI() {
+    const dailyBudget = this.getDailyBudget();
+    const spent = this.getMonthExpenses();
+    const remaining = this.data.income - this.data.savings - spent;
+    const daysLeft = new Date(this.currentYear, this.currentMonth + 1, 0).getDate() - 
+                     (this.currentMonth === new Date().getMonth() ? new Date().getDate() : 0);
+    
+    document.getElementById('stat-budget').textContent = Math.round(dailyBudget) + ' DT';
+    document.getElementById('stat-spent').textContent = spent + ' DT';
+    document.getElementById('stat-remaining').textContent = remaining + ' DT';
+    document.getElementById('stat-days').textContent = daysLeft;
+    
+    // Progress ring
+    const totalBudget = this.data.income - this.data.savings;
+    const percent = totalBudget > 0 ? Math.min((spent / totalBudget) * 100, 100) : 0;
+    const circumference = 264;
+    const offset = circumference - (percent / 100) * circumference;
+    
+    document.getElementById('progress-ring').style.strokeDashoffset = offset;
+    document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
+    
+    let statusText = 'Dans le budget';
+    if (percent > 100) statusText = 'Budget dépassé !';
+    else if (percent > 80) statusText = 'Attention...';
+    
+    document.getElementById('progress-detail').textContent = 
+      `${spent} / ${totalBudget} DT • ${statusText}`;
+    
+    this.renderRecentTransactions();
+  }
+
+  renderRecentTransactions() {
+    const container = document.getElementById('recent-transactions');
+    const dayExpenses = this.getDayExpenses(this.selectedDay);
+    
+    if (dayExpenses.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 40px; text-align: center; color: var(--ios-gray);">
+          <div style="font-size: 48px; margin-bottom: 12px;">📝</div>
+          <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Aucune dépense</div>
+          <div style="font-size: 15px;">Jour ${this.selectedDay}</div>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = dayExpenses.map((e, i) => `
+      <div class="transaction-item" onclick="app.confirmDelete(${this.selectedDay}, ${i})">
+        <div class="transaction-icon" style="background: ${e.color}20; color: ${e.color};">
+          ${this.data.categories[e.category]?.icon || '💰'}
+        </div>
+        <div class="transaction-info">
+          <div class="transaction-title">${e.category}</div>
+          <div class="transaction-subtitle">${new Date(e.timestamp).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+        </div>
+        <div class="transaction-amount">-${e.amount} DT</div>
+      </div>
+    `).join('');
+  }
+
+  confirmDelete(day, index) {
+    if (confirm('Supprimer cette dépense ?')) {
+      this.deleteExpense(day, index);
+    }
+  }
+
+  openSettings() {
+    document.getElementById('setting-income').value = this.data.income || '';
+    document.getElementById('setting-savings').value = this.data.savings || '';
+    document.getElementById('settings-modal').classList.add('active');
+  }
+
+  closeSettings(e) {
+    if (!e || e.target.id === 'settings-modal') {
+      document.getElementById('settings-modal').classList.remove('active');
+    }
+  }
+
+  saveSettings() {
+    const income = parseFloat(document.getElementById('setting-income').value);
+    const savings = parseFloat(document.getElementById('setting-savings').value);
+    
+    if (income > 0) {
+      this.data.income = income;
+      this.data.savings = savings || 0;
+      this.save();
+      this.updateUI();
+      this.closeSettings();
+      this.showNotification('Configuration sauvegardée');
+    }
+  }
+
+  switchTab(tab) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    if (tab === 'settings') {
+      this.openSettings();
+      // Reset tab
+      setTimeout(() => {
+        document.querySelectorAll('.tab-item')[0].classList.add('active');
+        document.querySelectorAll('.tab-item')[2].classList.remove('active');
+      }, 100);
+    }
+  }
+
+  showNotification(msg) {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: fixed;
+      top: calc(var(--safe-top) + 60px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ios-green);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 17px;
+      z-index: 3000;
+      animation: fadeIn 0.3s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    `;
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2000);
+  }
+
+  haptic(type) {
+    // Simulate haptic with vibration API
+    if (navigator.vibrate) {
+      switch(type) {
+        case 'light': navigator.vibrate(10); break;
+        case 'success': navigator.vibrate([10, 50, 10]); break;
+        case 'error': navigator.vibrate([50, 100, 50]); break;
+      }
+    }
+  }
+}
+
+const app = new BudgetApp();
+
+// Global functions for onclick
+function appendNumber(n) { app.appendNumber(n); }
+function deleteNumber() { app.deleteNumber(); }
+function selectCategory(el, cat, col) { app.selectCategory(el, cat, col); }
+function addExpense() { app.addExpense(); }
+function changeMonth(d) { app.changeMonth(d); }
+function switchTab(t) { app.switchTab(t); }
+function saveSettings() { app.saveSettings(); }
+function closeSettings(e) { app.closeSettings(e); }
+function showAllTransactions() { alert('Vue complète - à implémenter'); }
+
+// Prevent zoom on double tap
+document.addEventListener('dblclick', function(event) {
+  event.preventDefault();
+}, { passive: false });
+
+// Pull to refresh simulation
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+});
+document.addEventListener('touchend', e => {
+  const touchEndY = e.changedTouches[0].clientY;
+  if (touchEndY - touchStartY > 150 && document.scrollingElement.scrollTop === 0) {
+    // Pulled down at top
+    app.haptic('light');
+  }
+});
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>Budget Ultra</title>
+<title>Budget Ultra Pro</title>
 <style>
 :root {
   --safe-top: env(safe-area-inset-top, 47px);
@@ -33,9 +33,9 @@
   --ios-gray5: #2c2c2e;
   --ios-gray6: #1c1c1e;
   
-  --dynamic-island-height: 37px;
-  --tab-bar-height: 83px;
-  --header-height: 96px;
+  --key-size: min(88px, 22vw);
+  --key-gap: 12px;
+  --pad-max-width: 400px;
 }
 
 * {
@@ -54,7 +54,6 @@ html, body {
   color: white;
 }
 
-/* Dynamic Island spacing */
 .app-container {
   height: 100vh;
   height: 100dvh;
@@ -62,206 +61,162 @@ html, body {
   flex-direction: column;
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
-  padding-left: var(--safe-left);
-  padding-right: var(--safe-right);
+  padding-left: max(var(--safe-left), 16px);
+  padding-right: max(var(--safe-right), 16px);
 }
 
-/* Header iOS style */
+/* Header compact */
 .ios-header {
-  padding: 12px 20px 16px;
+  padding: 8px 0 12px;
   text-align: center;
-  position: relative;
   flex-shrink: 0;
 }
 
 .ios-header-title {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.5px;
-  background: linear-gradient(180deg, #ffffff 0%, #8e8e93 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.3px;
 }
 
 .ios-header-subtitle {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--ios-gray);
-  margin-top: 4px;
-  font-weight: 400;
+  margin-top: 2px;
 }
 
-/* Main content scrollable */
+/* Main scroll */
 .main-scroll {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px;
-  padding-bottom: calc(var(--tab-bar-height) + 20px);
+  padding-bottom: 20px;
 }
 
 .main-scroll::-webkit-scrollbar {
   display: none;
 }
 
-/* iOS Cards */
-.ios-card {
+/* Input Section - Compact */
+.input-section {
   background: var(--ios-card);
-  border-radius: 20px;
-  margin-bottom: 16px;
-  overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 12px;
   border: 0.5px solid rgba(255,255,255,0.1);
 }
 
-.ios-card-header {
-  padding: 16px 20px 12px;
-  font-size: 20px;
-  font-weight: 600;
+/* Display Amount */
+.amount-display {
+  text-align: center;
+  padding: 12px 0 16px;
+  border-bottom: 0.5px solid var(--ios-gray4);
+  margin-bottom: 16px;
+}
+
+.amount-label {
+  font-size: 13px;
+  color: var(--ios-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.amount-value {
+  font-size: 56px;
+  font-weight: 300;
+  color: white;
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-currency {
+  font-size: 28px;
+  color: var(--ios-gray);
+  margin-left: 4px;
+}
+
+/* Description Input */
+.description-input-container {
+  margin-bottom: 16px;
+}
+
+.description-label {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.ios-card-body {
-  padding: 0 20px 20px;
-}
-
-/* Quick Input - iOS Style */
-.quick-input-section {
-  background: linear-gradient(180deg, var(--ios-card) 0%, var(--ios-gray6) 100%);
-  border-radius: 24px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 0.5px solid rgba(255,255,255,0.1);
-}
-
-.input-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.input-group {
-  flex: 1;
-}
-
-.input-group label {
-  display: block;
+  gap: 6px;
   font-size: 13px;
   color: var(--ios-gray);
   margin-bottom: 8px;
-  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.ios-input {
+.description-input {
   width: 100%;
-  height: 56px;
+  height: 48px;
   background: var(--ios-gray6);
   border: 1px solid var(--ios-gray4);
-  border-radius: 14px;
+  border-radius: 12px;
   color: white;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 17px;
   padding: 0 16px;
-  text-align: center;
-  transition: all 0.2s;
   -webkit-appearance: none;
+  transition: all 0.2s;
 }
 
-.ios-input:focus {
+.description-input:focus {
   outline: none;
   border-color: var(--ios-blue);
   background: var(--ios-gray5);
 }
 
-.ios-input::placeholder {
+.description-input::placeholder {
   color: var(--ios-gray2);
 }
 
-/* Number pad optimized for thumb */
-.number-display {
-  background: var(--ios-gray6);
-  border-radius: 16px;
-  padding: 20px;
-  text-align: right;
-  margin-bottom: 16px;
-  min-height: 64px;
+/* Quick Descriptions Chips */
+.quick-descriptions {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.number-display-value {
-  font-size: 42px;
-  font-weight: 300;
-  color: white;
-  letter-spacing: -1px;
-}
-
-.number-display-currency {
-  font-size: 24px;
-  color: var(--ios-gray);
-  margin-left: 8px;
-}
-
-/* iOS Number Pad */
-.number-pad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.num-key {
-  aspect-ratio: 1;
+.desc-chip {
+  padding: 6px 12px;
   background: var(--ios-gray5);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 400;
-  color: white;
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--ios-gray);
   cursor: pointer;
-  transition: all 0.1s;
-  user-select: none;
-  border: none;
-  -webkit-appearance: none;
+  transition: all 0.2s;
+  border: 1px solid transparent;
 }
 
-.num-key:active {
-  background: var(--ios-gray4);
+.desc-chip:active {
   transform: scale(0.95);
+  background: var(--ios-gray4);
 }
 
-.num-key.wide {
-  grid-column: span 2;
-  aspect-ratio: 2;
-  border-radius: 40px;
-}
-
-.num-key.action {
+.desc-chip.selected {
   background: var(--ios-blue);
   color: white;
-  font-size: 24px;
+  border-color: rgba(255,255,255,0.2);
 }
 
-.num-key.action:active {
-  background: #0051d5;
-}
-
-.num-key.delete {
-  background: var(--ios-gray4);
-  font-size: 20px;
-}
-
-/* Category Selector - iOS Segmented */
+/* Category Selector */
 .category-section {
   margin-bottom: 16px;
+}
+
+.category-label {
+  font-size: 13px;
+  color: var(--ios-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
 }
 
 .category-scroll {
@@ -271,6 +226,8 @@ html, body {
   padding: 4px 0;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  margin: 0 -4px;
+  padding: 4px;
 }
 
 .category-scroll::-webkit-scrollbar {
@@ -279,213 +236,263 @@ html, body {
 
 .category-chip {
   flex-shrink: 0;
-  padding: 12px 20px;
-  background: var(--ios-gray5);
-  border-radius: 20px;
-  font-size: 16px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--ios-gray5);
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s;
   border: 2px solid transparent;
+  min-width: 72px;
 }
 
 .category-chip:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
+  background: var(--ios-gray4);
 }
 
 .category-chip.selected {
   background: var(--ios-blue);
   border-color: rgba(255,255,255,0.3);
+  transform: scale(1.02);
 }
 
-/* iOS Button */
-.ios-button {
+.category-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.category-name {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ERGONOMIC NUMBER PAD */
+.pad-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--key-gap);
+  max-width: var(--pad-max-width);
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+.pad-row {
+  display: flex;
+  gap: var(--key-gap);
   width: 100%;
-  height: 56px;
-  background: var(--ios-blue);
-  color: white;
+  justify-content: center;
+}
+
+.num-key {
+  width: var(--key-size);
+  height: var(--key-size);
+  background: var(--ios-gray5);
+  border-radius: 50%;
   border: none;
-  border-radius: 14px;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  -webkit-appearance: none;
-}
-
-.ios-button:active {
-  opacity: 0.8;
-  transform: scale(0.98);
-}
-
-.ios-button.secondary {
-  background: var(--ios-gray5);
+  font-size: 32px;
+  font-weight: 400;
   color: white;
-}
-
-.ios-button.success {
-  background: var(--ios-green);
-}
-
-/* Stats Grid - iOS Style */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.stat-box {
-  background: var(--ios-card);
-  border-radius: 16px;
-  padding: 16px;
-  text-align: left;
-  border: 0.5px solid rgba(255,255,255,0.1);
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--ios-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: white;
-  letter-spacing: -0.5px;
-}
-
-.stat-value.positive { color: var(--ios-green); }
-.stat-value.negative { color: var(--ios-red); }
-.stat-value.warning { color: var(--ios-orange); }
-
-/* Progress Ring */
-.progress-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: var(--ios-card);
-  border-radius: 20px;
-  margin-bottom: 16px;
-}
-
-.progress-ring-container {
+  cursor: pointer;
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
+  overflow: hidden;
+  -webkit-appearance: none;
+  user-select: none;
 }
 
-.progress-ring-svg {
-  transform: rotate(-90deg);
+/* Key press effect */
+.num-key:active {
+  transform: scale(0.88);
+  background: var(--ios-gray4);
+}
+
+.num-key::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.num-key:active::after {
   width: 100%;
   height: 100%;
 }
 
-.progress-ring-bg {
-  fill: none;
-  stroke: var(--ios-gray5);
-  stroke-width: 8;
-}
-
-.progress-ring-fill {
-  fill: none;
-  stroke: var(--ios-blue);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.5s ease;
-  filter: drop-shadow(0 0 6px var(--ios-blue));
-}
-
-.progress-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* Special keys */
+.num-key.wide {
+  width: calc(var(--key-size) * 2 + var(--key-gap));
+  border-radius: 44px;
+  background: var(--ios-gray4);
   font-size: 24px;
-  font-weight: 700;
 }
 
-.progress-info {
-  flex: 1;
-}
-
-.progress-info-title {
-  font-size: 17px;
+.num-key.action {
+  background: var(--ios-blue);
+  font-size: 24px;
   font-weight: 600;
-  margin-bottom: 4px;
 }
 
-.progress-info-subtitle {
-  font-size: 15px;
+.num-key.action:active {
+  background: #0051d5;
+  transform: scale(0.88);
+}
+
+.num-key.delete {
+  background: var(--ios-gray4);
+  font-size: 24px;
+}
+
+/* Zero key special */
+.num-key.zero {
+  position: relative;
+}
+
+.num-key.zero::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--key-size) + var(--key-gap));
+  width: var(--key-size);
+  height: var(--key-size);
+  pointer-events: none;
+}
+
+/* Add Button */
+.add-button {
+  width: 100%;
+  height: 56px;
+  background: var(--ios-green);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.add-button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.add-button:disabled {
+  background: var(--ios-gray3);
   color: var(--ios-gray);
+  cursor: not-allowed;
 }
 
-/* Calendar - iOS Style */
-.calendar-section {
-  margin-bottom: 16px;
+/* Stats Compact */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.stat-item {
+  background: var(--ios-card);
+  border-radius: 16px;
+  padding: 12px 8px;
+  text-align: center;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+.stat-value {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.positive { color: var(--ios-green); }
+.stat-value.negative { color: var(--ios-red); }
+.stat-value.neutral { color: white; }
+
+.stat-label {
+  font-size: 10px;
+  color: var(--ios-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Calendar Compact */
+.calendar-card {
+  background: var(--ios-card);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 0.5px solid rgba(255,255,255,0.1);
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 0.5px solid var(--ios-gray4);
 }
 
 .calendar-title {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
 }
 
 .calendar-nav {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
-.calendar-nav-btn {
-  width: 32px;
-  height: 32px;
+.calendar-btn {
+  width: 28px;
+  height: 28px;
   background: var(--ios-gray5);
   border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   cursor: pointer;
-  border: none;
-  color: white;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 12px;
-  gap: 4px;
+  padding: 8px;
+  gap: 2px;
 }
 
-.calendar-day-header {
+.cal-day-header {
   text-align: center;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--ios-gray);
   font-weight: 600;
-  padding: 8px 0;
-  text-transform: uppercase;
+  padding: 6px 0;
 }
 
-.calendar-day {
+.cal-day {
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
@@ -493,119 +500,140 @@ html, body {
   justify-content: center;
   border-radius: 50%;
   cursor: pointer;
+  font-size: 15px;
   position: relative;
-  transition: all 0.2s;
-  margin: 2px;
+  transition: all 0.15s;
+  margin: 1px;
 }
 
-.calendar-day:active {
-  background: var(--ios-gray5);
+.cal-day:active {
   transform: scale(0.9);
+  background: var(--ios-gray5);
 }
 
-.calendar-day.today {
+.cal-day.today {
   background: var(--ios-blue);
-  box-shadow: 0 0 0 2px var(--ios-blue);
-}
-
-.calendar-day.selected {
-  background: var(--ios-gray4);
-  box-shadow: 0 0 0 2px var(--ios-blue);
-}
-
-.calendar-day-number {
-  font-size: 17px;
-  font-weight: 500;
-}
-
-.calendar-day-amount {
-  font-size: 10px;
-  color: var(--ios-gray);
-  margin-top: 2px;
   font-weight: 600;
 }
 
-.calendar-day-dot {
+.cal-day.selected {
+  box-shadow: 0 0 0 2px var(--ios-blue);
+}
+
+.cal-day.has-data {
+  font-weight: 600;
+}
+
+.cal-dot {
   position: absolute;
-  bottom: 4px;
-  width: 5px;
-  height: 5px;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
 }
 
-.dot-good { background: var(--ios-green); }
-.dot-warning { background: var(--ios-orange); }
-.dot-danger { background: var(--ios-red); }
-
-/* Transaction List */
-.transactions-list {
+/* Recent List */
+.recent-card {
   background: var(--ios-card);
   border-radius: 20px;
   overflow: hidden;
+  border: 0.5px solid rgba(255,255,255,0.1);
 }
 
-.transaction-item {
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 0.5px solid var(--ios-gray4);
+}
+
+.recent-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.recent-action {
+  color: var(--ios-blue);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.recent-item {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  padding: 12px 16px;
   border-bottom: 0.5px solid var(--ios-gray4);
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.transaction-item:active {
+.recent-item:active {
   background: var(--ios-gray5);
 }
 
-.transaction-icon {
-  width: 40px;
-  height: 40px;
+.recent-icon {
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
-.transaction-info {
+.recent-info {
   flex: 1;
   min-width: 0;
 }
 
-.transaction-title {
-  font-size: 17px;
-  font-weight: 600;
+.recent-desc {
+  font-size: 15px;
+  font-weight: 500;
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.transaction-subtitle {
-  font-size: 15px;
+.recent-meta {
+  font-size: 13px;
   color: var(--ios-gray);
 }
 
-.transaction-amount {
-  font-size: 17px;
+.recent-amount {
+  font-size: 16px;
   font-weight: 600;
   color: var(--ios-red);
-  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Tab Bar - iOS Style */
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 32px;
+  color: var(--ios-gray);
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+/* Tab Bar */
 .tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--tab-bar-height);
-  background: rgba(0,0,0,0.8);
+  height: calc(64px + var(--safe-bottom));
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 0.5px solid rgba(255,255,255,0.2);
+  border-top: 0.5px solid rgba(255,255,255,0.15);
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
@@ -639,42 +667,36 @@ html, body {
   font-weight: 500;
 }
 
-/* Modal - iOS Sheet */
-.modal-overlay {
+/* Settings Modal */
+.modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(3px);
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(5px);
   z-index: 2000;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s;
+  display: flex;
+  align-items: flex-end;
 }
 
-.modal-overlay.active {
+.modal.active {
   opacity: 1;
   visibility: visible;
 }
 
 .modal-sheet {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  width: 100%;
   background: var(--ios-card);
   border-radius: 24px 24px 0 0;
   padding: 20px;
   padding-bottom: calc(20px + var(--safe-bottom));
   transform: translateY(100%);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  max-height: 90vh;
-  overflow-y: auto;
 }
 
-.modal-overlay.active .modal-sheet {
+.modal.active .modal-sheet {
   transform: translateY(0);
 }
 
@@ -686,24 +708,80 @@ html, body {
   margin: 0 auto 20px;
 }
 
-/* Haptic feedback simulation */
-@media (hover: none) {
-  .num-key:active,
-  .category-chip:active,
-  .calendar-day:active,
-  .transaction-item:active,
-  .ios-button:active {
-    opacity: 0.7;
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  color: var(--ios-gray);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ios-input {
+  width: 100%;
+  height: 52px;
+  background: var(--ios-gray6);
+  border: 1px solid var(--ios-gray4);
+  border-radius: 12px;
+  color: white;
+  font-size: 20px;
+  padding: 0 16px;
+  font-weight: 500;
+  -webkit-appearance: none;
+}
+
+.ios-input:focus {
+  outline: none;
+  border-color: var(--ios-blue);
+}
+
+.modal-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--ios-blue);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 8px;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.modal-btn.secondary {
+  background: var(--ios-gray5);
+  color: white;
+}
+
+/* Animations */
+@keyframes keyPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+.key-anim {
+  animation: keyPress 0.15s ease;
+}
+
+/* Large touch targets for accessibility */
+@media (min-width: 390px) {
+  :root {
+    --key-size: min(92px, 20vw);
+    --key-gap: 14px;
   }
-}
-
-/* Hide on scroll for immersive experience */
-.hide-on-scroll {
-  transition: transform 0.3s;
-}
-
-.scrolled .hide-on-scroll {
-  transform: translateY(-100%);
 }
 </style>
 </head>
@@ -713,144 +791,170 @@ html, body {
   
   <!-- Header -->
   <header class="ios-header">
-    <h1 class="ios-header-title">Budget Ultra</h1>
-    <p class="ios-header-subtitle" id="current-date">Aujourd'hui</p>
+    <h1 class="ios-header-title">💰 Budget Ultra</h1>
+    <p class="ios-header-subtitle" id="header-date">Aujourd'hui</p>
   </header>
 
-  <!-- Main Content -->
   <main class="main-scroll" id="main-scroll">
     
-    <!-- Quick Add Card -->
-    <div class="quick-input-section">
-      <div class="number-display">
-        <span class="number-display-value" id="display-amount">0</span>
-        <span class="number-display-currency">DT</span>
-      </div>
+    <!-- INPUT SECTION -->
+    <div class="input-section">
       
-      <!-- iOS Number Pad -->
-      <div class="number-pad">
-        <button class="num-key" onclick="appendNumber('1')">1</button>
-        <button class="num-key" onclick="appendNumber('2')">2</button>
-        <button class="num-key" onclick="appendNumber('3')">3</button>
-        <button class="num-key" onclick="appendNumber('4')">4</button>
-        <button class="num-key" onclick="appendNumber('5')">5</button>
-        <button class="num-key" onclick="appendNumber('6')">6</button>
-        <button class="num-key" onclick="appendNumber('7')">7</button>
-        <button class="num-key" onclick="appendNumber('8')">8</button>
-        <button class="num-key" onclick="appendNumber('9')">9</button>
-        <button class="num-key wide" onclick="appendNumber('0')">0</button>
-        <button class="num-key delete" onclick="deleteNumber()">⌫</button>
+      <!-- Amount Display -->
+      <div class="amount-display">
+        <div class="amount-label">Montant</div>
+        <div>
+          <span class="amount-value" id="display-amount">0</span>
+          <span class="amount-currency">DT</span>
+        </div>
+      </div>
+
+      <!-- Description Input -->
+      <div class="description-input-container">
+        <div class="description-label">
+          <span>📝</span> Description (optionnelle)
+        </div>
+        <input type="text" 
+               class="description-input" 
+               id="desc-input" 
+               placeholder="Ex: Courses hebdo, Essence, etc."
+               autocomplete="off">
+        
+        <!-- Quick Description Chips -->
+        <div class="quick-descriptions" id="quick-desc">
+          <div class="desc-chip" onclick="setDescription('Courses')">🛒 Courses</div>
+          <div class="desc-chip" onclick="setDescription('Essence')">⛽ Essence</div>
+          <div class="desc-chip" onclick="setDescription('Resto')">🍽️ Resto</div>
+          <div class="desc-chip" onclick="setDescription('Café')">☕ Café</div>
+          <div class="desc-chip" onclick="setDescription('Transport')">🚌 Transport</div>
+          <div class="desc-chip" onclick="setDescription('Pharmacie')">💊 Pharma</div>
+        </div>
       </div>
 
       <!-- Category Selector -->
       <div class="category-section">
+        <div class="category-label">Catégorie</div>
         <div class="category-scroll" id="category-list">
           <div class="category-chip" onclick="selectCategory(this, '🍽️ Alimentation', '#ff453a')">
-            <span>🍽️</span> <span>Alim</span>
+            <span class="category-icon">🍽️</span>
+            <span class="category-name">Alim</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '🚗 Transport', '#0a84ff')">
-            <span>🚗</span> <span>Trans</span>
+            <span class="category-icon">🚗</span>
+            <span class="category-name">Trans</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '🏠 Logement', '#bf5af2')">
-            <span>🏠</span> <span>Logt</span>
+            <span class="category-icon">🏠</span>
+            <span class="category-name">Logt</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '⚕️ Santé', '#30d158')">
-            <span>⚕️</span> <span>Santé</span>
+            <span class="category-icon">⚕️</span>
+            <span class="category-name">Santé</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '🎮 Loisirs', '#ff9f0a')">
-            <span>🎮</span> <span>Lois</span>
+            <span class="category-icon">🎮</span>
+            <span class="category-name">Loisirs</span>
           </div>
-          <div class="category-chip" onclick="selectCategory(this, '🛍️ Shop', '#ff375f')">
-            <span>🛍️</span> <span>Shop</span>
+          <div class="category-chip" onclick="selectCategory(this, '🛍️ Shopping', '#ff375f')">
+            <span class="category-icon">🛍️</span>
+            <span class="category-name">Shop</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '👶 Enfants', '#64d2ff')">
-            <span>👶</span> <span>Enf</span>
+            <span class="category-icon">👶</span>
+            <span class="category-name">Enfants</span>
           </div>
           <div class="category-chip" onclick="selectCategory(this, '📦 Autre', '#8e8e93')">
-            <span>📦</span> <span>Autre</span>
+            <span class="category-icon">📦</span>
+            <span class="category-name">Autre</span>
           </div>
         </div>
       </div>
 
-      <button class="ios-button" onclick="addExpense()">
-        <span>+</span> Ajouter la dépense
-      </button>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-label">Budget/jour</div>
-        <div class="stat-value" id="stat-budget">0 DT</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Dépensé</div>
-        <div class="stat-value negative" id="stat-spent">0 DT</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Restant</div>
-        <div class="stat-value positive" id="stat-remaining">0 DT</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Jours rest</div>
-        <div class="stat-value" id="stat-days">0</div>
-      </div>
-    </div>
-
-    <!-- Progress Ring -->
-    <div class="progress-section">
-      <div class="progress-ring-container">
-        <svg class="progress-ring-svg" viewBox="0 0 100 100">
-          <circle class="progress-ring-bg" cx="50" cy="50" r="42"/>
-          <circle class="progress-ring-fill" id="progress-ring" cx="50" cy="50" r="42" 
-                  stroke-dasharray="264" stroke-dashoffset="264"/>
-        </svg>
-        <div class="progress-text" id="progress-percent">0%</div>
-      </div>
-      <div class="progress-info">
-        <div class="progress-info-title">Budget mensuel</div>
-        <div class="progress-info-subtitle" id="progress-detail">Configurez votre revenu</div>
-      </div>
-    </div>
-
-    <!-- Calendar -->
-    <div class="ios-card">
-      <div class="calendar-header">
-        <div class="calendar-title" id="calendar-month">Octobre 2024</div>
-        <div class="calendar-nav">
-          <button class="calendar-nav-btn" onclick="changeMonth(-1)">‹</button>
-          <button class="calendar-nav-btn" onclick="changeMonth(1)">›</button>
+      <!-- ERGONOMIC NUMBER PAD -->
+      <div class="pad-container">
+        <div class="pad-row">
+          <button class="num-key" onclick="pressKey('1')">1</button>
+          <button class="num-key" onclick="pressKey('2')">2</button>
+          <button class="num-key" onclick="pressKey('3')">3</button>
+        </div>
+        <div class="pad-row">
+          <button class="num-key" onclick="pressKey('4')">4</button>
+          <button class="num-key" onclick="pressKey('5')">5</button>
+          <button class="num-key" onclick="pressKey('6')">6</button>
+        </div>
+        <div class="pad-row">
+          <button class="num-key" onclick="pressKey('7')">7</button>
+          <button class="num-key" onclick="pressKey('8')">8</button>
+          <button class="num-key" onclick="pressKey('9')">9</button>
+        </div>
+        <div class="pad-row">
+          <button class="num-key wide delete" onclick="pressKey('back')">⌫</button>
+          <button class="num-key zero" onclick="pressKey('0')">0</button>
+          <button class="num-key action" onclick="pressKey('add')">✓</button>
         </div>
       </div>
-      <div class="calendar-grid" id="calendar-grid">
-        <!-- Generated by JS -->
+
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value neutral" id="stat-budget">0</div>
+        <div class="stat-label">Budget/j</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value negative" id="stat-spent">0</div>
+        <div class="stat-label">Dépensé</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value positive" id="stat-remaining">0</div>
+        <div class="stat-label">Restant</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value neutral" id="stat-days">0</div>
+        <div class="stat-label">Jours</div>
       </div>
     </div>
 
-    <!-- Recent Transactions -->
-    <div class="ios-card">
-      <div class="ios-card-header">
-        <span>Transactions récentes</span>
-        <span style="color: var(--ios-blue); font-size: 17px;" onclick="showAllTransactions()">Voir tout</span>
+    <!-- CALENDAR -->
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <div class="calendar-title" id="cal-month">Octobre 2024</div>
+        <div class="calendar-nav">
+          <button class="calendar-btn" onclick="changeMonth(-1)">‹</button>
+          <button class="calendar-btn" onclick="changeMonth(1)">›</button>
+        </div>
       </div>
-      <div class="transactions-list" id="recent-transactions">
-        <!-- Generated by JS -->
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <!-- RECENT TRANSACTIONS -->
+    <div class="recent-card">
+      <div class="recent-header">
+        <span class="recent-title">Aujourd'hui</span>
+        <span class="recent-action" onclick="showAll()">Tout voir</span>
+      </div>
+      <div id="recent-list">
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <div>Aucune dépense</div>
+        </div>
       </div>
     </div>
 
   </main>
 
-  <!-- Tab Bar -->
+  <!-- TAB BAR -->
   <nav class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('home')">
+    <div class="tab-item active" onclick="switchTab('home', this)">
       <span class="tab-icon">🏠</span>
       <span class="tab-label">Accueil</span>
     </div>
-    <div class="tab-item" onclick="switchTab('stats')">
+    <div class="tab-item" onclick="switchTab('stats', this)">
       <span class="tab-icon">📊</span>
       <span class="tab-label">Stats</span>
     </div>
-    <div class="tab-item" onclick="switchTab('settings')">
+    <div class="tab-item" onclick="openSettings()">
       <span class="tab-icon">⚙️</span>
       <span class="tab-label">Réglages</span>
     </div>
@@ -858,34 +962,35 @@ html, body {
 
 </div>
 
-<!-- Settings Modal -->
-<div class="modal-overlay" id="settings-modal" onclick="closeSettings(event)">
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settings-modal" onclick="closeSettings(event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
-    <h2 style="font-size: 22px; margin-bottom: 20px; text-align: center;">Configuration</h2>
+    <div class="modal-title">Configuration</div>
     
-    <div class="input-group" style="margin-bottom: 16px;">
-      <label>Revenu mensuel (DT)</label>
-      <input type="number" class="ios-input" id="setting-income" placeholder="2500">
+    <div class="input-group">
+      <label class="input-label">Revenu mensuel (DT)</label>
+      <input type="number" class="ios-input" id="setting-income" placeholder="2000">
     </div>
     
-    <div class="input-group" style="margin-bottom: 20px;">
-      <label>Objectif d'épargne (DT)</label>
+    <div class="input-group">
+      <label class="input-label">Épargne mensuelle (DT)</label>
       <input type="number" class="ios-input" id="setting-savings" placeholder="500">
     </div>
     
-    <button class="ios-button" onclick="saveSettings()">Sauvegarder</button>
-    <button class="ios-button secondary" onclick="closeSettings()" style="margin-top: 12px;">Annuler</button>
+    <button class="modal-btn" onclick="saveSettings()">Sauvegarder</button>
+    <button class="modal-btn secondary" onclick="closeSettings()">Annuler</button>
   </div>
 </div>
 
 <script>
-// Budget App Logic
 class BudgetApp {
   constructor() {
-    this.currentAmount = '0';
+    this.amount = '0';
     this.selectedCategory = null;
     this.selectedCategoryEl = null;
+    this.selectedColor = null;
+    this.description = '';
     this.selectedDay = new Date().getDate();
     this.currentMonth = new Date().getMonth();
     this.currentYear = new Date().getFullYear();
@@ -895,18 +1000,18 @@ class BudgetApp {
   }
 
   loadData() {
-    const saved = localStorage.getItem('budget_ios_16');
+    const saved = localStorage.getItem('budget_iphone16_v3');
     return saved ? JSON.parse(saved) : {
       income: 0,
       savings: 0,
-      expenses: {}, // { '2024-10': { 15: [{amount, category, color, timestamp}] } }
+      expenses: {},
       categories: {
         '🍽️ Alimentation': { color: '#ff453a', icon: '🍽️' },
         '🚗 Transport': { color: '#0a84ff', icon: '🚗' },
         '🏠 Logement': { color: '#bf5af2', icon: '🏠' },
         '⚕️ Santé': { color: '#30d158', icon: '⚕️' },
         '🎮 Loisirs': { color: '#ff9f0a', icon: '🎮' },
-        '🛍️ Shop': { color: '#ff375f', icon: '🛍️' },
+        '🛍️ Shopping': { color: '#ff375f', icon: '🛍️' },
         '👶 Enfants': { color: '#64d2ff', icon: '👶' },
         '📦 Autre': { color: '#8e8e93', icon: '📦' }
       }
@@ -914,23 +1019,27 @@ class BudgetApp {
   }
 
   save() {
-    localStorage.setItem('budget_ios_16', JSON.stringify(this.data));
+    localStorage.setItem('budget_iphone16_v3', JSON.stringify(this.data));
   }
 
   init() {
-    this.updateDate();
+    this.updateHeaderDate();
     this.renderCalendar();
     this.updateUI();
     
-    // Check for settings
     if (this.data.income === 0) {
-      setTimeout(() => this.openSettings(), 500);
+      setTimeout(() => this.openSettings(), 600);
     }
+
+    // Focus description input on load for quick entry
+    document.getElementById('desc-input').addEventListener('focus', () => {
+      this.haptic('light');
+    });
   }
 
-  updateDate() {
+  updateHeaderDate() {
     const options = { weekday: 'long', day: 'numeric', month: 'long' };
-    document.getElementById('current-date').textContent = 
+    document.getElementById('header-date').textContent = 
       new Date().toLocaleDateString('fr-FR', options);
   }
 
@@ -953,54 +1062,85 @@ class BudgetApp {
     return monthData[day] || [];
   }
 
-  appendNumber(num) {
-    if (this.currentAmount === '0') {
-      this.currentAmount = num;
+  pressKey(key) {
+    this.haptic('light');
+    
+    if (key === 'back') {
+      if (this.amount.length > 1) {
+        this.amount = this.amount.slice(0, -1);
+      } else {
+        this.amount = '0';
+      }
+    } else if (key === 'add') {
+      this.addExpense();
+      return;
     } else {
-      this.currentAmount += num;
+      if (this.amount === '0') {
+        this.amount = key;
+      } else if (this.amount.length < 6) {
+        this.amount += key;
+      }
     }
+    
     this.updateDisplay();
-  }
-
-  deleteNumber() {
-    if (this.currentAmount.length > 1) {
-      this.currentAmount = this.currentAmount.slice(0, -1);
-    } else {
-      this.currentAmount = '0';
-    }
-    this.updateDisplay();
+    
+    // Visual feedback
+    const btn = event.target;
+    btn.classList.add('key-anim');
+    setTimeout(() => btn.classList.remove('key-anim'), 150);
   }
 
   updateDisplay() {
+    const num = parseInt(this.amount);
     document.getElementById('display-amount').textContent = 
-      parseInt(this.currentAmount).toLocaleString('fr-FR');
+      num.toLocaleString('fr-FR');
   }
 
-  selectCategory(element, category, color) {
+  setDescription(desc) {
+    this.haptic('light');
+    const input = document.getElementById('desc-input');
+    input.value = desc;
+    this.description = desc;
+    
+    // Update chips UI
+    document.querySelectorAll('.desc-chip').forEach(c => c.classList.remove('selected'));
+    event.target.classList.add('selected');
+  }
+
+  selectCategory(el, category, color) {
+    this.haptic('light');
+    
     if (this.selectedCategoryEl) {
       this.selectedCategoryEl.classList.remove('selected');
     }
-    element.classList.add('selected');
-    this.selectedCategoryEl = element;
+    
+    el.classList.add('selected');
+    this.selectedCategoryEl = el;
     this.selectedCategory = category;
     this.selectedColor = color;
   }
 
   addExpense() {
-    const amount = parseInt(this.currentAmount);
+    const amount = parseInt(this.amount);
+    
     if (amount === 0) {
       this.haptic('error');
+      this.shakeDisplay();
       return;
     }
+    
     if (!this.selectedCategory) {
-      alert('Sélectionnez une catégorie');
+      this.haptic('error');
+      // Auto-select first category if none selected
+      const firstCat = document.querySelector('.category-chip');
+      if (firstCat) firstCat.click();
       return;
     }
 
+    const desc = document.getElementById('desc-input').value || this.selectedCategory;
+    
     const monthKey = this.getMonthKey();
-    if (!this.data.expenses[monthKey]) {
-      this.data.expenses[monthKey] = {};
-    }
+    if (!this.data.expenses[monthKey]) this.data.expenses[monthKey] = {};
     if (!this.data.expenses[monthKey][this.selectedDay]) {
       this.data.expenses[monthKey][this.selectedDay] = [];
     }
@@ -1008,6 +1148,7 @@ class BudgetApp {
     this.data.expenses[monthKey][this.selectedDay].push({
       amount: amount,
       category: this.selectedCategory,
+      description: desc,
       color: this.selectedColor,
       timestamp: new Date().toISOString()
     });
@@ -1015,35 +1156,45 @@ class BudgetApp {
     this.save();
     this.haptic('success');
     
-    // Reset
-    this.currentAmount = '0';
+    // Reset form
+    this.amount = '0';
     this.updateDisplay();
+    document.getElementById('desc-input').value = '';
+    this.description = '';
+    document.querySelectorAll('.desc-chip').forEach(c => c.classList.remove('selected'));
     
-    // Feedback
-    this.showNotification(`-${amount} DT ${this.selectedCategory}`);
+    // Keep category selected for rapid entry
+    
+    this.showNotification(`-${amount} DT`);
     this.updateUI();
     this.renderCalendar();
   }
 
+  shakeDisplay() {
+    const display = document.querySelector('.amount-display');
+    display.style.animation = 'shake 0.5s';
+    setTimeout(() => display.style.animation = '', 500);
+  }
+
   deleteExpense(day, index) {
-    const monthKey = this.getMonthKey();
-    if (this.data.expenses[monthKey] && this.data.expenses[monthKey][day]) {
+    if (confirm('Supprimer cette dépense ?')) {
+      const monthKey = this.getMonthKey();
       this.data.expenses[monthKey][day].splice(index, 1);
       if (this.data.expenses[monthKey][day].length === 0) {
         delete this.data.expenses[monthKey][day];
       }
       this.save();
+      this.haptic('light');
       this.updateUI();
       this.renderCalendar();
-      this.haptic('light');
     }
   }
 
   selectDay(day) {
+    this.haptic('light');
     this.selectedDay = day;
     this.renderCalendar();
-    // Scroll to show this day's expenses
-    this.renderRecentTransactions();
+    this.renderRecentList();
   }
 
   changeMonth(delta) {
@@ -1056,52 +1207,48 @@ class BudgetApp {
       this.currentYear--;
     }
     this.renderCalendar();
-    this.updateUI();
   }
 
   renderCalendar() {
     const grid = document.getElementById('calendar-grid');
-    const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
     
-    document.getElementById('calendar-month').textContent = 
-      `${monthNames[this.currentMonth]} ${this.currentYear}`;
+    document.getElementById('cal-month').textContent = 
+      `${months[this.currentMonth]} ${this.currentYear}`;
     
     const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-    let html = days.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+    let html = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
     
     const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
     const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     
-    for (let i = 0; i < firstDay; i++) {
-      html += '<div></div>';
-    }
+    for (let i = 0; i < firstDay; i++) html += '<div></div>';
     
     const today = new Date();
-    const isCurrentMonth = today.getMonth() === this.currentMonth && today.getFullYear() === this.currentYear;
+    const isCurrentMonth = today.getMonth() === this.currentMonth && 
+                          today.getFullYear() === this.currentYear;
     const todayNum = today.getDate();
-    
     const dailyBudget = this.getDailyBudget();
     
     for (let i = 1; i <= daysInMonth; i++) {
-      const dayExpenses = this.getDayExpenses(i);
-      const total = dayExpenses.reduce((s, e) => s + e.amount, 0);
+      const dayExp = this.getDayExpenses(i);
+      const total = dayExp.reduce((s, e) => s + e.amount, 0);
       const isToday = isCurrentMonth && i === todayNum;
       const isSelected = i === this.selectedDay;
       
-      let dotClass = '';
+      let dot = '';
       if (total > 0) {
-        if (total <= dailyBudget) dotClass = 'dot-good';
-        else if (total <= dailyBudget * 1.3) dotClass = 'dot-warning';
-        else dotClass = 'dot-danger';
+        const color = total <= dailyBudget ? 'var(--ios-green)' : 
+                     total <= dailyBudget * 1.3 ? 'var(--ios-orange)' : 'var(--ios-red)';
+        dot = `<div class="cal-dot" style="background: ${color}"></div>`;
       }
       
       html += `
-        <div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" 
+        <div class="cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${total > 0 ? 'has-data' : ''}" 
              onclick="app.selectDay(${i})">
-          <div class="calendar-day-number">${i}</div>
-          ${total > 0 ? `<div class="calendar-day-amount">${total}</div>` : ''}
-          ${dotClass ? `<div class="calendar-day-dot ${dotClass}"></div>` : ''}
+          ${i}
+          ${dot}
         </div>
       `;
     }
@@ -1110,69 +1257,46 @@ class BudgetApp {
   }
 
   updateUI() {
-    const dailyBudget = this.getDailyBudget();
+    const daily = this.getDailyBudget();
     const spent = this.getMonthExpenses();
     const remaining = this.data.income - this.data.savings - spent;
     const daysLeft = new Date(this.currentYear, this.currentMonth + 1, 0).getDate() - 
                      (this.currentMonth === new Date().getMonth() ? new Date().getDate() : 0);
     
-    document.getElementById('stat-budget').textContent = Math.round(dailyBudget) + ' DT';
-    document.getElementById('stat-spent').textContent = spent + ' DT';
-    document.getElementById('stat-remaining').textContent = remaining + ' DT';
+    document.getElementById('stat-budget').textContent = Math.round(daily);
+    document.getElementById('stat-spent').textContent = spent;
+    document.getElementById('stat-remaining').textContent = remaining;
     document.getElementById('stat-days').textContent = daysLeft;
     
-    // Progress ring
-    const totalBudget = this.data.income - this.data.savings;
-    const percent = totalBudget > 0 ? Math.min((spent / totalBudget) * 100, 100) : 0;
-    const circumference = 264;
-    const offset = circumference - (percent / 100) * circumference;
-    
-    document.getElementById('progress-ring').style.strokeDashoffset = offset;
-    document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
-    
-    let statusText = 'Dans le budget';
-    if (percent > 100) statusText = 'Budget dépassé !';
-    else if (percent > 80) statusText = 'Attention...';
-    
-    document.getElementById('progress-detail').textContent = 
-      `${spent} / ${totalBudget} DT • ${statusText}`;
-    
-    this.renderRecentTransactions();
+    this.renderRecentList();
   }
 
-  renderRecentTransactions() {
-    const container = document.getElementById('recent-transactions');
-    const dayExpenses = this.getDayExpenses(this.selectedDay);
+  renderRecentList() {
+    const container = document.getElementById('recent-list');
+    const list = this.getDayExpenses(this.selectedDay);
     
-    if (dayExpenses.length === 0) {
+    if (list.length === 0) {
       container.innerHTML = `
-        <div style="padding: 40px; text-align: center; color: var(--ios-gray);">
-          <div style="font-size: 48px; margin-bottom: 12px;">📝</div>
-          <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Aucune dépense</div>
-          <div style="font-size: 15px;">Jour ${this.selectedDay}</div>
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <div>Aucune dépense ce jour</div>
         </div>
       `;
       return;
     }
     
-    container.innerHTML = dayExpenses.map((e, i) => `
-      <div class="transaction-item" onclick="app.confirmDelete(${this.selectedDay}, ${i})">
-        <div class="transaction-icon" style="background: ${e.color}20; color: ${e.color};">
+    container.innerHTML = list.map((e, i) => `
+      <div class="recent-item" onclick="app.deleteExpense(${this.selectedDay}, ${i})">
+        <div class="recent-icon" style="background: ${e.color}20; color: ${e.color};">
           ${this.data.categories[e.category]?.icon || '💰'}
         </div>
-        <div class="transaction-info">
-          <div class="transaction-title">${e.category}</div>
-          <div class="transaction-subtitle">${new Date(e.timestamp).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+        <div class="recent-info">
+          <div class="recent-desc">${e.description || e.category}</div>
+          <div class="recent-meta">${e.category} • ${new Date(e.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</div>
         </div>
-        <div class="transaction-amount">-${e.amount} DT</div>
+        <div class="recent-amount">-${e.amount}</div>
       </div>
     `).join('');
-  }
-
-  confirmDelete(day, index) {
-    if (confirm('Supprimer cette dépense ?')) {
-      this.deleteExpense(day, index);
-    }
   }
 
   openSettings() {
@@ -1197,29 +1321,20 @@ class BudgetApp {
       this.save();
       this.updateUI();
       this.closeSettings();
-      this.showNotification('Configuration sauvegardée');
+      this.showNotification('Configuration sauvegardée ✓');
     }
   }
 
-  switchTab(tab) {
+  switchTab(tab, el) {
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    
-    if (tab === 'settings') {
-      this.openSettings();
-      // Reset tab
-      setTimeout(() => {
-        document.querySelectorAll('.tab-item')[0].classList.add('active');
-        document.querySelectorAll('.tab-item')[2].classList.remove('active');
-      }, 100);
-    }
+    el.classList.add('active');
   }
 
   showNotification(msg) {
     const div = document.createElement('div');
     div.style.cssText = `
       position: fixed;
-      top: calc(var(--safe-top) + 60px);
+      top: calc(var(--safe-top) + 50px);
       left: 50%;
       transform: translateX(-50%);
       background: var(--ios-green);
@@ -1227,7 +1342,7 @@ class BudgetApp {
       padding: 12px 24px;
       border-radius: 20px;
       font-weight: 600;
-      font-size: 17px;
+      font-size: 16px;
       z-index: 3000;
       animation: fadeIn 0.3s;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
@@ -1238,12 +1353,11 @@ class BudgetApp {
   }
 
   haptic(type) {
-    // Simulate haptic with vibration API
     if (navigator.vibrate) {
       switch(type) {
-        case 'light': navigator.vibrate(10); break;
-        case 'success': navigator.vibrate([10, 50, 10]); break;
-        case 'error': navigator.vibrate([50, 100, 50]); break;
+        case 'light': navigator.vibrate(5); break;
+        case 'success': navigator.vibrate([10, 30, 10]); break;
+        case 'error': navigator.vibrate([40, 100, 40]); break;
       }
     }
   }
@@ -1251,33 +1365,47 @@ class BudgetApp {
 
 const app = new BudgetApp();
 
-// Global functions for onclick
-function appendNumber(n) { app.appendNumber(n); }
-function deleteNumber() { app.deleteNumber(); }
-function selectCategory(el, cat, col) { app.selectCategory(el, cat, col); }
-function addExpense() { app.addExpense(); }
+// Global functions
+function pressKey(k) { app.pressKey(k); }
+function setDescription(d) { app.setDescription(d); }
+function selectCategory(el, c, col) { app.selectCategory(el, c, col); }
 function changeMonth(d) { app.changeMonth(d); }
-function switchTab(t) { app.switchTab(t); }
-function saveSettings() { app.saveSettings(); }
+function switchTab(t, el) { app.switchTab(t, el); }
+function openSettings() { app.openSettings(); }
 function closeSettings(e) { app.closeSettings(e); }
-function showAllTransactions() { alert('Vue complète - à implémenter'); }
+function saveSettings() { app.saveSettings(); }
+function showAll() { alert('Vue complète - à venir'); }
 
-// Prevent zoom on double tap
-document.addEventListener('dblclick', function(event) {
-  event.preventDefault();
-}, { passive: false });
-
-// Pull to refresh simulation
-let touchStartY = 0;
-document.addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-});
-document.addEventListener('touchend', e => {
-  const touchEndY = e.changedTouches[0].clientY;
-  if (touchEndY - touchStartY > 150 && document.scrollingElement.scrollTop === 0) {
-    // Pulled down at top
-    app.haptic('light');
+// Add shake animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
   }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+`;
+document.head.appendChild(style);
+
+// Prevent double tap zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
+// Keyboard support for testing on desktop
+document.addEventListener('keydown', (e) => {
+  if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+  if (e.key === 'Backspace') pressKey('back');
+  if (e.key === 'Enter') pressKey('add');
 });
 </script>
 

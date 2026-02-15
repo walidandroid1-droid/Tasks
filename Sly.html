@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système Contrôle Qualité & Emballage - SmartQC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .scan-line { animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .pulse-success { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .barcode-scanner { position: relative; overflow: hidden; }
+        .barcode-scanner::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: #10b981; box-shadow: 0 0 10px #10b981; animation: scan 2s linear infinite; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .input-focus:focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3); border-color: #6366f1; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-active { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .status-warning { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+        .status-error { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .print-area { display: none; }
+        @media print { .print-area { display: block; } .no-print { display: none !important; } }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="glass fixed w-full z-50 top-0 border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">SmartQC Pro</h1>
+                        <p class="text-xs text-slate-400">Système Anti-Erreur Intelligent</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-full border border-slate-700">
+                        <span class="status-dot status-active"></span>
+                        <span class="text-sm font-medium" id="systemStatus">Système Opérationnel</span>
+                    </div>
+                    <button onclick="toggleMode()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors text-sm font-medium">
+                        <i class="fas fa-exchange-alt mr-2"></i>Changer Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-20 pb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- Mode Selector -->
+        <div class="mb-8 text-center">
+            <div class="inline-flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                <button id="btnCV" onclick="switchMode('cv')" class="px-6 py-3 rounded-lg font-medium transition-all bg-indigo-600 text-white shadow-lg">
+                    <i class="fas fa-eye mr-2"></i>Contrôle Visuel (CV)
+                </button>
+                <button id="btnEmb" onclick="switchMode('emb')" class="px-6 py-3 rounded-lg font-medium transition-all text-slate-400 hover:text-white">
+                    <i class="fas fa-box mr-2"></i>Emballage
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer" class="mb-6"></div>
+
+        <!-- MODE CONTRÔLE VISUEL -->
+        <div id="modeCV" class="space-y-6">
+            
+            <!-- Innovation: Smart Scanner Interface -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Panel 1: Saisie Commande -->
+                <div class="glass rounded-2xl p-6 card-hover border-l-4 border-indigo-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-white"><i class="fas fa-clipboard-check mr-2 text-indigo-400"></i>1. Identification</h2>
+                        <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">Étape 1/3</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">N° Commande <span class="text-red-400">*</span></label>
+                            <div class="relative">
+                                <input type="text" id="cvCommande" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus transition-all" placeholder="SCAN ou Saisie..." onkeyup="checkDuplicateCommande(this.value)">
+                                <i class="fas fa-barcode absolute right-3 top-3.5 text-slate-500"></i>
+                            </div>
+                            <p id="cmdError" class="text-xs text-red-400 mt-1 hidden"><i class="fas fa-exclamation-triangle mr-1"></i>Commande déjà en cours!</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Article <span class="text-red-400">*</span></label>
+                                <input type="text" id="cvArticle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus" placeholder="Référence">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Index</label>
+                                <input type="text" id="cvIndex" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus" placeholder="Idx">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Client</label>
+                            <select id="cvClient" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus">
+                                <option value="">Sélectionner...</option>
+                                <option value="CLIENT_A">Client A (Premium)</option>
+                                <option value="CLIENT_B">Client B (Standard)</option>
+                                <option value="CLIENT_C">Client C (Express)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Contrôleur <span class="text-red-400">*</span></label>
+                            <select id="cvOperateur" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus">
+                                <option value="">Qui contrôle ?</option>
+                                <option value="OP001">Ahmed Benali</option>
+                                <option value="OP002">Sarah Martin</option>
+                                <option value="OP003">Lucas Dubois</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Scan Sécurisé (INNOVATION) -->
+                <div class="glass rounded-2xl p-6 card-hover border-l-4 border-emerald-500 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-white"><i class="fas fa-fingerprint mr-2 text-emerald-400"></i>2. Scan Anti-Doublon</h2>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full">
+                                <i class="fas fa-lock mr-1"></i>Sécurisé
+                            </span>
+                            <span class="text-xs text-slate-500" id="scanCount">0/0 scan(s)</span>
+                        </div>
+                    </div>
+
+                    <!-- Innovation: Visual Scanner -->
+                    <div class="bg-slate-900 rounded-xl p-6 mb-4 border-2 border-dashed border-slate-700 barcode-scanner relative overflow-hidden" id="scannerZone">
+                        <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none"></div>
+                        <div class="text-center relative z-10">
+                            <div class="w-20 h-20 mx-auto mb-4 bg-slate-800 rounded-full flex items-center justify-center border-2 border-emerald-500/30" id="scanIcon">
+                                <i class="fas fa-barcode text-3xl text-emerald-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-white mb-2">Scanner le code-barres</h3>
+                            <p class="text-sm text-slate-400 mb-4">Chaque NS doit être unique - Doublon = Blocage immédiat</p>
+                            
+                            <div class="max-w-md mx-auto relative">
+                                <input type="text" id="scanInput" class="w-full bg-slate-800 border-2 border-slate-600 rounded-lg px-4 py-4 text-center text-lg font-mono tracking-wider text-white focus:border-emerald-500 focus:outline-none transition-all" placeholder="____________" autocomplete="off">
+                                <button onclick="simulateScan()" class="absolute right-2 top-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-xs text-slate-300">
+                                    <i class="fas fa-mobile-alt mr-1"></i>Simuler
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Innovation: Liste avec vérification visuelle -->
+                    <div class="bg-slate-800/50 rounded-xl p-4 max-h-64 overflow-y-auto" id="scannedList">
+                        <div class="text-center text-slate-500 py-8">
+                            <i class="fas fa-inbox text-3xl mb-2 opacity-50"></i>
+                            <p class="text-sm">Aucun numéro de série scanné</p>
+                            <p class="text-xs mt-1">Les NS apparaîtront ici avec statut de vérification</p>
+                        </div>
+                    </div>
+
+                    <!-- Innovation: Progress Bar -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-400">Progression</span>
+                            <span class="text-emerald-400 font-medium" id="progressText">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Innovation: Tableau de bord temps réel -->
+            <div class="glass rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>
+                    Contrôles en cours aujourd'hui
+                    <span class="ml-auto text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full" id="totalToday">0 contrôle(s)</span>
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-800/50">
+                            <tr>
+                                <th class="px-4 py-3 rounded-l-lg">Heure</th>
+                                <th class="px-4 py-3">Commande</th>
+                                <th class="px-4 py-3">Article</th>
+                                <th class="px-4 py-3">Qté</th>
+                                <th class="px-4 py-3">Opérateur</th>
+                                <th class="px-4 py-3">Statut</th>
+                                <th class="px-4 py-3 rounded-r-lg">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cvTableBody" class="text-sm divide-y divide-slate-700">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODE EMBALLAGE -->
+        <div id="modeEmb" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Panel: Recherche Commande -->
+                <div class="glass rounded-2xl p-6 card-hover border-l-4 border-amber-500">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-white"><i class="fas fa-search mr-2 text-amber-400"></i>Récupération Données CV</h2>
+                        <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded">Auto-fill</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-slate-400 mb-2">N° Commande à emballer</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="embCommande" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white input-focus text-lg font-mono" placeholder="SCAN commande..." onchange="fetchCVData()">
+                                <button onclick="fetchCVData()" class="px-4 bg-amber-600 hover:bg-amber-700 rounded-lg text-white transition-colors">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Résultat Auto-fill -->
+                        <div id="cvDataDisplay" class="hidden space-y-3 slide-in">
+                            <div class="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500 block text-xs">Article</span>
+                                        <span class="text-white font-medium text-lg" id="dispArticle">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 block text-xs">Client</span>
+                                        <span class="text-white font-medium" id="dispClient">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 block text-xs">Qté Contrôlée</span>
+                                        <span class="text-emerald-400 font-bold text-xl" id="dispQte">0</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500 block text-xs">Contrôleur</span>
+                                        <span class="text-blue-400" id="dispOperateur">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Innovation: Validation Qté -->
+                            <div class="bg-slate-900 rounded-lg p-4 border-2 border-slate-700" id="qteControlZone">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Quantité à emballer 
+                                    <span class="text-xs text-amber-400 ml-2">(Max: <span id="maxQte">0</span>)</span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="adjustQte(-1)" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-600">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" id="embQte" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-center text-2xl font-bold text-white" value="0" min="0" onchange="validateQte()">
+                                    <button onclick="adjustQte(1)" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-600">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                <p id="qteError" class="text-xs text-red-400 mt-2 hidden"><i class="fas fa-ban mr-1"></i>Quantité supérieure au contrôle!</p>
+                            </div>
+
+                            <button onclick="validatePackaging()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-lg text-white font-bold shadow-lg transform transition hover:scale-[1.02]">
+                                <i class="fas fa-box-open mr-2"></i>Valider l'emballage
+                            </button>
+                        </div>
+
+                        <div id="noDataMsg" class="text-center py-8 text-slate-500">
+                            <i class="fas fa-search text-4xl mb-3 opacity-30"></i>
+                            <p>Scannez une commande validée en CV</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: Impression Étiquette -->
+                <div class="glass rounded-2xl p-6 card-hover border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-white"><i class="fas fa-print mr-2 text-purple-400"></i>Étiquette d'Emballage</h2>
+                        <span class="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded">Auto-Gen</span>
+                    </div>
+
+                    <!-- Preview Étiquette -->
+                    <div id="labelPreview" class="hidden">
+                        <div class="bg-white text-black p-6 rounded-lg shadow-2xl mb-4 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+                            <div class="border-2 border-black p-4">
+                                <div class="flex justify-between items-start mb-4 border-b-2 border-black pb-2">
+                                    <div>
+                                        <h3 class="font-bold text-xl">SMARTQC EMBALLAGE</h3>
+                                        <p class="text-xs font-mono">ID: <span id="labelId">EQ-2024-001</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="w-16 h-16 bg-black text-white flex items-center justify-center font-bold text-xs" id="qrCode">
+                                            QR
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="font-bold">Commande:</span>
+                                        <span class="font-mono" id="labelCmd">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-bold">Article:</span>
+                                        <span id="labelArt">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-bold">Client:</span>
+                                        <span id="labelClient">-</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-black pt-2 mt-2">
+                                        <span class="font-bold text-lg">Qté:</span>
+                                        <span class="font-bold text-2xl text-purple-700" id="labelQte">0</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs pt-2">
+                                        <span>Date: <span id="labelDate">-</span></span>
+                                        <span>Op: <span id="labelOp">-</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="printLabel()" class="flex-1 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-medium transition-colors">
+                                <i class="fas fa-print mr-2"></i>Imprimer
+                            </button>
+                            <button onclick="saveToDb()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors">
+                                <i class="fas fa-database mr-2"></i>Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="emptyLabel" class="text-center py-12 text-slate-500 border-2 border-dashed border-slate-700 rounded-lg">
+                        <i class="fas fa-tag text-4xl mb-3 opacity-30"></i>
+                        <p>L'étiquette s'affichera ici</p>
+                        <p class="text-xs mt-1">après validation de l'emballage</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historique Emballage -->
+            <div class="glass rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-history mr-2 text-purple-400"></i>
+                    Historique Emballage
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-800/50">
+                            <tr>
+                                <th class="px-4 py-3 rounded-l-lg">ID</th>
+                                <th class="px-4 py-3">Commande</th>
+                                <th class="px-4 py-3">Qté</th>
+                                <th class="px-4 py-3">Date</th>
+                                <th class="px-4 py-3 rounded-r-lg">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="embTableBody" class="text-sm divide-y divide-slate-700">
+                            <!-- Dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Innovation: Modal Alert -->
+    <div id="alertModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-red-500 shadow-2xl transform scale-100 transition-transform">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">ALERTE SÉCURITÉ</h3>
+                <p class="text-slate-300 mb-6" id="alertMessage">Message d'erreur ici</p>
+                <button onclick="closeAlert()" class="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-bold">
+                    J'ai compris
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Innovation: Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-emerald-500 shadow-2xl">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 pulse-success">
+                    <i class="fas fa-check-circle text-3xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Opération Réussie</h3>
+                <p class="text-slate-300 mb-6" id="successMessage">Message de succès</p>
+                <button onclick="closeSuccess()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-bold">
+                    Continuer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let currentMode = 'cv';
+        let scannedItems = new Set(); // Innovation: Set pour doublons impossibles
+        let cvDatabase = []; // Simulation base de données
+        let embDatabase = [];
+        let currentCV = null;
+
+        // Mode Switching
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeCV').classList.toggle('hidden', mode !== 'cv');
+            document.getElementById('modeEmb').classList.toggle('hidden', mode !== 'emb');
+            
+            document.getElementById('btnCV').className = mode === 'cv' 
+                ? 'px-6 py-3 rounded-lg font-medium transition-all bg-indigo-600 text-white shadow-lg'
+                : 'px-6 py-3 rounded-lg font-medium transition-all text-slate-400 hover:text-white';
+            
+            document.getElementById('btnEmb').className = mode === 'emb'
+                ? 'px-6 py-3 rounded-lg font-medium transition-all bg-indigo-600 text-white shadow-lg'
+                : 'px-6 py-3 rounded-lg font-medium transition-all text-slate-400 hover:text-white';
+        }
+
+        function toggleMode() {
+            switchMode(currentMode === 'cv' ? 'emb' : 'cv');
+        }
+
+        // Innovation: Détection doublon commande en temps réel
+        function checkDuplicateCommande(val) {
+            const exists = cvDatabase.some(item => item.commande === val && !item.completed);
+            const errorEl = document.getElementById('cmdError');
+            if (exists) {
+                errorEl.classList.remove('hidden');
+                document.getElementById('cvCommande').classList.add('border-red-500');
+            } else {
+                errorEl.classList.add('hidden');
+                document.getElementById('cvCommande').classList.remove('border-red-500');
+            }
+        }
+
+        // Innovation: Scan avec vérification immédiate
+        document.getElementById('scanInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processScan(this.value);
+                this.value = '';
+            }
+        });
+
+        function processScan(code) {
+            if (!code) return;
+            
+            // Vérification doublon immédiate
+            if (scannedItems.has(code)) {
+                showAlert(`DOUBLON DÉTECTÉ!<br>Le numéro de série <b>${code}</b> a déjà été scanné.<br>Cette erreur aurait provoqué une réclamation client.`);
+                document.getElementById('scannerZone').classList.add('shake');
+                setTimeout(() => document.getElementById('scannerZone').classList.remove('shake'), 500);
+                return;
+            }
+
+            // Vérification champs requis
+            if (!document.getElementById('cvCommande').value || !document.getElementById('cvOperateur').value) {
+                showAlert('Veuillez remplir la commande et le contrôleur avant de scanner.');
+                return;
+            }
+
+            // Ajout sécurisé
+            scannedItems.add(code);
+            updateScannedList(code);
+            updateProgress();
+            
+            // Feedback visuel
+            const icon = document.getElementById('scanIcon');
+            icon.classList.add('pulse-success');
+            icon.innerHTML = '<i class="fas fa-check text-3xl text-emerald-400"></i>';
+            setTimeout(() => {
+                icon.classList.remove('pulse-success');
+                icon.innerHTML = '<i class="fas fa-barcode text-3xl text-emerald-400"></i>';
+            }, 1000);
+        }
+
+        function updateScannedList(code) {
+            const list = document.getElementById('scannedList');
+            if (scannedItems.size === 1) list.innerHTML = '';
+            
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between bg-slate-700/50 p-3 rounded-lg mb-2 slide-in border-l-4 border-emerald-500';
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-emerald-400"></i>
+                    <span class="font-mono text-emerald-100">${code}</span>
+                </div>
+                <span class="text-xs text-slate-400">${new Date().toLocaleTimeString()}</span>
+            `;
+            list.insertBefore(div, list.firstChild);
+            
+            document.getElementById('scanCount').textContent = `${scannedItems.size} scan(s)`;
+        }
+
+        function updateProgress() {
+            const target = parseInt(document.getElementById('cvQte')?.value) || scannedItems.size;
+            const pct = Math.min(100, (scannedItems.size / target) * 100);
+            document.getElementById('progressBar').style.width = `${pct}%`;
+            document.getElementById('progressText').textContent = `${Math.round(pct)}%`;
+        }
+
+        function simulateScan() {
+            const codes = ['NS2024001', 'NS2024002', 'NS2024003', 'NS2024004', 'NS2024005'];
+            const randomCode = codes[Math.floor(Math.random() * codes.length)] + Math.floor(Math.random() * 100);
+            document.getElementById('scanInput').value = randomCode;
+            processScan(randomCode);
+        }
+
+        // Innovation: Validation finale CV
+        function saveCV() {
+            if (scannedItems.size === 0) {
+                showAlert('Aucun numéro de série scanné!');
+                return;
+            }
+
+            const data = {
+                id: Date.now(),
+                commande: document.getElementById('cvCommande').value,
+                article: document.getElementById('cvArticle').value,
+                client: document.getElementById('cvClient').value,
+                operateur: document.getElementById('cvOperateur').value,
+                quantite: scannedItems.size,
+                nsList: Array.from(scannedItems),
+                timestamp: new Date(),
+                completed: true
+            };
+
+            cvDatabase.push(data);
+            updateCVTable();
+            showSuccess(`Contrôle enregistré!<br>${scannedItems.size} pièce(s) validée(s)<br>Passage à l'emballage autorisé.`);
+            
+            // Reset
+            scannedItems.clear();
+            document.getElementById('scannedList').innerHTML = `
+                <div class="text-center text-slate-500 py-8">
+                    <i class="fas fa-inbox text-3xl mb-2 opacity-50"></i>
+                    <p class="text-sm">Aucun numéro de série scanné</p>
+                </div>`;
+            document.getElementById('scanCount').textContent = '0/0 scan(s)';
+            document.getElementById('progressBar').style.width = '0%';
+            document.querySelectorAll('#modeCV input').forEach(i => i.value = '');
+        }
+
+        function updateCVTable() {
+            const tbody = document.getElementById('cvTableBody');
+            tbody.innerHTML = cvDatabase.slice(-5).reverse().map(item => `
+                <tr class="hover:bg-slate-800/50 transition-colors">
+                    <td class="px-4 py-3 text-slate-400">${item.timestamp.toLocaleTimeString()}</td>
+                    <td class="px-4 py-3 font-medium text-white">${item.commande}</td>
+                    <td class="px-4 py-3">${item.article}</td>
+                    <td class="px-4 py-3"><span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded text-xs">${item.quantite}</span></td>
+                    <td class="px-4 py-3 text-slate-300">${item.operateur}</td>
+                    <td class="px-4 py-3"><span class="status-dot status-active"></span>OK</td>
+                    <td class="px-4 py-3">
+                        <button onclick="sendToPackaging('${item.commande}')" class="text-amber-400 hover:text-amber-300 text-xs underline">
+                            Emballer →
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('totalToday').textContent = `${cvDatabase.length} contrôle(s)`;
+        }
+
+        // Mode Emballage
+        function fetchCVData() {
+            const cmd = document.getElementById('embCommande').value;
+            const data = cvDatabase.find(c => c.commande === cmd);
+            
+            if (!data) {
+                showAlert('Commande non trouvée ou non contrôlée!');
+                return;
+            }
+
+            currentCV = data;
+            document.getElementById('noDataMsg').classList.add('hidden');
+            document.getElementById('cvDataDisplay').classList.remove('hidden');
+            
+            document.getElementById('dispArticle').textContent = data.article;
+            document.getElementById('dispClient').textContent = data.client;
+            document.getElementById('dispQte').textContent = data.quantite;
+            document.getElementById('dispOperateur').textContent = data.operateur;
+            document.getElementById('maxQte').textContent = data.quantite;
+            document.getElementById('embQte').max = data.quantite;
+            document.getElementById('embQte').value = data.quantite;
+        }
+
+        function adjustQte(delta) {
+            const input = document.getElementById('embQte');
+            const newVal = parseInt(input.value) + delta;
+            if (newVal >= 0 && newVal <= currentCV.quantite) {
+                input.value = newVal;
+                validateQte();
+            }
+        }
+
+        function validateQte() {
+            const input = document.getElementById('embQte');
+            const max = currentCV.quantite;
+            const val = parseInt(input.value);
+            const errorEl = document.getElementById('qteError');
+            
+            if (val > max) {
+                input.classList.add('border-red-500', 'text-red-400');
+                errorEl.classList.remove('hidden');
+                return false;
+            } else {
+                input.classList.remove('border-red-500', 'text-red-400');
+                errorEl.classList.add('hidden');
+                return true;
+            }
+        }
+
+        function validatePackaging() {
+            if (!validateQte()) {
+                showAlert('La quantité ne peut pas dépasser le contrôle visuel!');
+                return;
+            }
+
+            const qte = document.getElementById('embQte').value;
+            
+            // Génération étiquette
+            document.getElementById('emptyLabel').classList.add('hidden');
+            document.getElementById('labelPreview').classList.remove('hidden');
+            
+            document.getElementById('labelCmd').textContent = currentCV.commande;
+            document.getElementById('labelArt').textContent = currentCV.article;
+            document.getElementById('labelClient').textContent = currentCV.client;
+            document.getElementById('labelQte').textContent = qte;
+            document.getElementById('labelDate').textContent = new Date().toLocaleDateString();
+            document.getElementById('labelOp').textContent = currentCV.operateur;
+            document.getElementById('labelId').textContent = 'EQ-' + Date.now().toString().slice(-8);
+            
+            // Génération QR Code simple (simulation visuelle)
+            document.getElementById('qrCode').innerHTML = `
+                <div class="grid grid-cols-4 gap-0.5 w-full h-full p-1">
+                    ${Array(16).fill(0).map(() => `<div class="${Math.random() > 0.5 ? 'bg-white' : 'bg-black'} w-full h-full"></div>`).join('')}
+                </div>
+            `;
+        }
+
+        function printLabel() {
+            window.print();
+        }
+
+        function saveToDb() {
+            const data = {
+                id: 'EQ-' + Date.now().toString().slice(-8),
+                commande: currentCV.commande,
+                quantite: document.getElementById('embQte').value,
+                date: new Date(),
+                statut: 'Emballé'
+            };
+            embDatabase.push(data);
+            updateEmbTable();
+            showSuccess('Emballage sauvegardé en base de données!');
+            
+            // Reset
+            document.getElementById('embCommande').value = '';
+            document.getElementById('cvDataDisplay').classList.add('hidden');
+            document.getElementById('noDataMsg').classList.remove('hidden');
+            document.getElementById('labelPreview').classList.add('hidden');
+            document.getElementById('emptyLabel').classList.remove('hidden');
+        }
+
+        function updateEmbTable() {
+            const tbody = document.getElementById('embTableBody');
+            tbody.innerHTML = embDatabase.slice(-5).reverse().map(item => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="px-4 py-3 font-mono text-purple-400">${item.id}</td>
+                    <td class="px-4 py-3 text-white">${item.commande}</td>
+                    <td class="px-4 py-3"><span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded">${item.quantite}</span></td>
+                    <td class="px-4 py-3 text-slate-400">${item.date.toLocaleString()}</td>
+                    <td class="px-4 py-3"><span class="status-dot status-active"></span>${item.statut}</td>
+                </tr>
+            `).join('');
+        }
+
+        function sendToPackaging(cmd) {
+            switchMode('emb');
+            document.getElementById('embCommande').value = cmd;
+            fetchCVData();
+        }
+
+        // UI Helpers
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerHTML = msg;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertModal').classList.add('hidden');
+        }
+
+        function showSuccess(msg) {
+            document.getElementById('successMessage').innerHTML = msg;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeSuccess() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Focus auto sur scan
+            document.getElementById('scanInput').focus();
+        });
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (currentMode === 'cv') saveCV();
+            }
+            if (e.key === 'Escape') {
+                closeAlert();
+                closeSuccess();
+            }
+        });
+    </script>
+</body>
+</html>

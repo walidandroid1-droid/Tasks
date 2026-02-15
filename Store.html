@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قائمة المشتريات الذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .add-store-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .store-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .store-name {
+            font-size: 1.4em;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .store-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .store-total {
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .item-input {
+            flex: 2;
+            min-width: 150px;
+        }
+
+        .price-input {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .items-list {
+            list-style: none;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .item-row:hover {
+            background: #e9ecef;
+        }
+
+        .item-row.checked {
+            opacity: 0.6;
+            background: #d4edda;
+        }
+
+        .item-row.checked .item-name {
+            text-decoration: line-through;
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            margin-left: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .item-row.checked .checkbox-custom {
+            background: #667eea;
+            color: white;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 1.1em;
+        }
+
+        .item-price {
+            background: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-left: 10px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+            margin-right: 10px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .item-row:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .grand-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .suggestions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .suggestions h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ffeaa7;
+        }
+
+        .tag:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .store-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🛒 قائمة المشتريات الذكية</h1>
+        <p>نظّم مشترياتك واحسب ميزانيتك بسهولة</p>
+    </div>
+
+    <div class="stats-card">
+        <div class="stat-item">
+            <div class="stat-value" id="totalStores">0</div>
+            <div class="stat-label">المحلات</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalItems">0</div>
+            <div class="stat-label">المنتجات</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="checkedItems">0</div>
+            <div class="stat-label">تم شراؤها</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="remainingBudget">0</div>
+            <div class="stat-label">المتبقي (د.ت)</div>
+        </div>
+    </div>
+
+    <div class="add-store-section">
+        <h3 class="section-title">➕ إضافة محل جديد</h3>
+        <div class="input-group">
+            <input type="text" class="input-field" id="newStoreName" placeholder="اسم المحل (مثال: جزار النابلي)">
+            <select class="input-field" id="storeCategory" style="flex: 0.5;">
+                <option value="🥩">🥩 لحم</option>
+                <option value="🥬">🥬 خضار</option>
+                <option value="🥫">🥫 مواد غذائية</option>
+                <option value="🐟">🐟 سمك</option>
+                <option value="🧹">🧹 مواد تنظيف</option>
+                <option value="🥖">🥖 مخبزة</option>
+            </select>
+            <button class="btn btn-primary" onclick="addStore()">
+                <span>إضافة</span>
+            </button>
+        </div>
+        
+        <div class="suggestions">
+            <h4>💡 اقتراحات سريعة:</h4>
+            <div class="suggestion-tags">
+                <span class="tag" onclick="quickAddStore('جزار النابلي', '🥩')">🥩 جزار النابلي</span>
+                <span class="tag" onclick="quickAddStore('خضار الجمعة', '🥬')">🥬 خضار الجمعة</span>
+                <span class="tag" onclick="quickAddStore('عزيزة والجميلي', '🥫')">🥫 عزيزة والجميلي</span>
+                <span class="tag" onclick="quickAddStore('المزرعة', '🐔')">🐔 المزرعة</span>
+                <span class="tag" onclick="quickAddStore('السمكار', '🐟')">🐟 السمكار</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="storesContainer"></div>
+
+    <div class="grand-total">
+        <div>الميزانية الإجمالية: <span id="grandTotal">0.000</span> د.ت</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div style="font-size: 0.6em; margin-top: 10px;">
+            <span id="progressText">0%</span> تم إنجازه
+        </div>
+    </div>
+</div>
+
+<script>
+    let stores = [];
+    let storeIdCounter = 0;
+    let itemIdCounter = 0;
+
+    // اقتراحات المنتجات حسب الفئة
+    const productSuggestions = {
+        '🥩': [
+            {name: 'رطل لحم هبرة', price: 25},
+            {name: 'مفروم (20د)', price: 20},
+            {name: 'كبدة', price: 18},
+            {name: 'قلب', price: 15},
+            {name: 'كباب', price: 30}
+        ],
+        '🥬': [
+            {name: 'بطاطا (2كغ)', price: 4},
+            {name: 'بصل (0.5كغ)', price: 2},
+            {name: 'فلفل حار', price: 3},
+            {name: 'فلفل مشوية', price: 5},
+            {name: 'جلبانة', price: 4},
+            {name: 'سنارية', price: 3},
+            {name: 'معدنوس', price: 1.5},
+            {name: 'كلافس', price: 2}
+        ],
+        '🥫': [
+            {name: 'تونة Neptune (160g)', price: 4.5},
+            {name: 'طماطم معلبة', price: 2.8},
+            {name: 'حمص مصري', price: 3.5},
+            {name: 'مايونيز', price: 5},
+            {name: 'صلصة', price: 2.5}
+        ],
+        '🐟': [
+            {name: 'سمك بلطي (1كغ)', price: 12},
+            {name: 'جمبري', price: 25},
+            {name: 'كلمار', price: 18}
+        ],
+        '🧹': [
+            {name: 'صابون غسيل', price: 8},
+            {name: 'منظف أرضيات', price: 6},
+            {name: 'ورق تواليت', price: 12}
+        ],
+        '🥖': [
+            {name: 'خبز فرنسي', price: 0.4},
+            {name: 'خبز تونسي', price: 0.3},
+            {name: 'ملاوي', price: 0.5}
+        ]
+    };
+
+    function addStore() {
+        const nameInput = document.getElementById('newStoreName');
+        const categorySelect = document.getElementById('storeCategory');
+        const name = nameInput.value.trim();
+        const icon = categorySelect.value;
+
+        if (!name) {
+            alert('الرجاء إدخال اسم المحل');
+            return;
+        }
+
+        const store = {
+            id: storeIdCounter++,
+            name: name,
+            icon: icon,
+            items: []
+        };
+
+        stores.push(store);
+        nameInput.value = '';
+        renderStores();
+        updateStats();
+    }
+
+    function quickAddStore(name, icon) {
+        document.getElementById('newStoreName').value = name;
+        document.getElementById('storeCategory').value = icon;
+        addStore();
+    }
+
+    function deleteStore(storeId) {
+        if (confirm('هل تريد حذف هذا المحل؟')) {
+            stores = stores.filter(s => s.id !== storeId);
+            renderStores();
+            updateStats();
+        }
+    }
+
+    function addItem(storeId) {
+        const store = stores.find(s => s.id === storeId);
+        const nameInput = document.getElementById(`item-name-${storeId}`);
+        const priceInput = document.getElementById(`item-price-${storeId}`);
+        
+        const name = nameInput.value.trim();
+        const price = parseFloat(priceInput.value) || 0;
+
+        if (!name) {
+            alert('الرجاء إدخال اسم المنتج');
+            return;
+        }
+
+        store.items.push({
+            id: itemIdCounter++,
+            name: name,
+            price: price,
+            checked: false
+        });
+
+        nameInput.value = '';
+        priceInput.value = '';
+        renderStores();
+        updateStats();
+    }
+
+    function toggleItem(storeId, itemId) {
+        const store = stores.find(s => s.id === storeId);
+        const item = store.items.find(i => i.id === itemId);
+        item.checked = !item.checked;
+        renderStores();
+        updateStats();
+    }
+
+    function deleteItem(storeId, itemId) {
+        const store = stores.find(s => s.id === storeId);
+        store.items = store.items.filter(i => i.id !== itemId);
+        renderStores();
+        updateStats();
+    }
+
+    function addSuggestedItem(storeId, name, price) {
+        const store = stores.find(s => s.id === storeId);
+        store.items.push({
+            id: itemIdCounter++,
+            name: name,
+            price: price,
+            checked: false
+        });
+        renderStores();
+        updateStats();
+    }
+
+    function renderStores() {
+        const container = document.getElementById('storesContainer');
+        container.innerHTML = '';
+
+        stores.forEach(store => {
+            const storeDiv = document.createElement('div');
+            storeDiv.className = 'store-card';
+            
+            const storeTotal = store.items.reduce((sum, item) => sum + item.price, 0);
+            
+            let itemsHtml = '';
+            if (store.items.length === 0) {
+                itemsHtml = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>لا توجد منتجات بعد</div>
+                    </div>
+                `;
+            } else {
+                itemsHtml = '<ul class="items-list">' + store.items.map(item => `
+                    <li class="item-row ${item.checked ? 'checked' : ''}" onclick="toggleItem(${store.id}, ${item.id})">
+                        <div class="checkbox-custom">${item.checked ? '✓' : ''}</div>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-price">${item.price.toFixed(3)} د.ت</span>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteItem(${store.id}, ${item.id})">🗑️</button>
+                    </li>
+                `).join('') + '</ul>';
+            }
+
+            // اقتراحات المنتجات للمحل
+            let suggestionsHtml = '';
+            const suggestions = productSuggestions[store.icon] || [];
+            if (suggestions.length > 0) {
+                suggestionsHtml = `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                        <small style="color: #666; display: block; margin-bottom: 8px;">➕ إضافة سريعة:</small>
+                        <div class="suggestion-tags">
+                            ${suggestions.map(s => `
+                                <span class="tag" onclick="addSuggestedItem(${store.id}, '${s.name}', ${s.price})">
+                                    ${s.name} (${s.price}د)
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            storeDiv.innerHTML = `
+                <div class="store-header">
+                    <div class="store-name">
+                        <div class="store-icon">${store.icon}</div>
+                        ${store.name}
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="store-total">المجموع: ${storeTotal.toFixed(3)} د.ت</div>
+                        <button class="btn btn-danger" onclick="deleteStore(${store.id})">حذف المحل</button>
+                    </div>
+                </div>
+                
+                <div class="add-item-form">
+                    <input type="text" class="input-field item-input" id="item-name-${store.id}" placeholder="اسم المنتج">
+                    <input type="number" class="input-field price-input" id="item-price-${store.id}" placeholder="السعر (د.ت)" step="0.001">
+                    <button class="btn btn-success" onclick="addItem(${store.id})">➕ إضافة</button>
+                </div>
+                
+                ${itemsHtml}
+                ${suggestionsHtml}
+            `;
+            
+            container.appendChild(storeDiv);
+        });
+    }
+
+    function updateStats() {
+        const totalStores = stores.length;
+        const totalItems = stores.reduce((sum, s) => sum + s.items.length, 0);
+        const checkedItems = stores.reduce((sum, s) => sum + s.items.filter(i => i.checked).length, 0);
+        const grandTotal = stores.reduce((sum, s) => sum + s.items.reduce((iSum, i) => iSum + i.price, 0), 0);
+        const checkedTotal = stores.reduce((sum, s) => sum + s.items.filter(i => i.checked).reduce((iSum, i) => iSum + i.price, 0), 0);
+        
+        document.getElementById('totalStores').textContent = totalStores;
+        document.getElementById('totalItems').textContent = totalItems;
+        document.getElementById('checkedItems').textContent = checkedItems;
+        document.getElementById('remainingBudget').textContent = (grandTotal - checkedTotal).toFixed(3);
+        document.getElementById('grandTotal').textContent = grandTotal.toFixed(3);
+        
+        const progress = totalItems > 0 ? (checkedItems / totalItems * 100) : 0;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressText').textContent = progress.toFixed(0) + '%';
+    }
+
+    // تحميل البيانات عند بدء التطبيق
+    renderStores();
+    updateStats();
+</script>
+
+</body>
+</html>
